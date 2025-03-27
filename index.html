@@ -61,6 +61,7 @@
     Lembre: Os dígitos podem se repetir.
   </p>
   <form id="guessForm">
+    <input type="number" placeholder="Meu número da vez" maxlength="4" required />
     <input type="text" id="guessInput" placeholder="Ex: 1234" maxlength="4" required pattern="\d{4}">
     <input type="number" id="feedbackInput" placeholder="Acertos" min="0" max="4" required>
     <button type="submit">Adicionar Palpite</button>
