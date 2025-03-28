@@ -1,0 +1,22 @@
+{
+  "packageId": "com.numberguesser.app",
+  "host": "https://f1x0n.github.io/number_guesser/",
+  "name": "Jogo dos 4 Dígitos",
+  "launcherName": "4 Dígitos",
+  "display": "standalone",
+  "themeColor": "#3B82F6",
+  "navigationColor": "#0F172A",
+  "backgroundColor": "#0F172A",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "icon": "icons/icon-512x512.png",
+  "splashScreen": {
+    "image": "icons/icon-512x512.png",
+    "resizeMode": "contain",
+    "backgroundColor": "#0F172A"
+  },
+  "signingKey": {
+    "alias": "key0",
+    "password": "sua-senha-aqui"
+  }
+} 

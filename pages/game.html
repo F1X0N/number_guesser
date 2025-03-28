@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#3B82F6">
+  <meta name="description" content="Jogo dos 4 Dígitos - Jogo">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="apple-touch-icon" href="../icons/icon-192x192.png">
+  <title>Jogo dos 4 Dígitos - Jogo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Jogo dos 4 Dígitos</h1>
+
+    <div class="game-container">
+      <form class="choosedNumberForm">
+        <input id="generatedNumber" type="number" placeholder="Meu número da vez" maxlength="4" />
+        <button type="submit">Gerar número</button>
+      </form>
+
+      <div class="suggestion">
+        <p id="suggestionText">Nenhum palpite inserido.</p>
+        <p id="candidateCount"></p>
+      </div>
+
+      <form id="guessForm">
+        <div class="guessInputs">
+          <input type="text" id="guessInput" placeholder="Ex: 1234" maxlength="4" required pattern="\d{4}">
+          <input type="number" id="feedbackInput" placeholder="Acertos" min="0" max="4" required>
+        </div>
+        <div class="guessInputs">
+          <button type="submit">Adicionar Palpite</button>
+          <button type="button" id="resetBtn">Nova Partida</button>
+        </div>
+      </form>
+      
+      <div class="history">
+        <h2>Histórico de Palpites</h2>
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>Palpite</th>
+              <th>Acertos</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Verificar se o usuário está logado e em uma sala
+    const username = localStorage.getItem('username');
+    const currentRoom = localStorage.getItem('currentRoom');
+
+    if (!username || !currentRoom) {
+      window.location.href = 'login.html';
+    }
+
+    // Registrar o Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('../service-worker.js')
+          .then(registration => {
+            console.log('ServiceWorker registrado com sucesso:', registration.scope);
+          })
+          .catch(error => {
+            console.log('Falha ao registrar o ServiceWorker:', error);
+          });
+      });
+    }
+  </script>
+  <script src="../script.js"></script>
+</body>
+</html> 

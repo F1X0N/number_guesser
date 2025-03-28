@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#3B82F6">
   <meta name="description" content="Jogo dos 4 Dígitos - Login">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="apple-touch-icon" href="../icons/icon-192x192.png">
   <title>Jogo dos 4 Dígitos - Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../style.css">
   <style>
     .login-container {
       max-width: 400px;
@@ -116,12 +116,6 @@
   </div>
 
   <script>
-    // Verificar se o usuário já está logado
-    const username = localStorage.getItem('username');
-    if (username) {
-      window.location.href = 'pages/lobby.html';
-    }
-
     // Gerenciamento de tabs
     const tabs = document.querySelectorAll('.login-tab');
     const forms = document.querySelectorAll('.login-form');
@@ -161,7 +155,7 @@
       // Salva o nome do usuário e redireciona para o lobby
       localStorage.setItem('username', username);
       localStorage.setItem('userType', 'player');
-      window.location.href = 'pages/lobby.html';
+      window.location.href = 'lobby.html';
     });
 
     devForm.addEventListener('submit', (e) => {
@@ -174,7 +168,7 @@
       if (username === 'admin' && password === 'admin123') {
         localStorage.setItem('username', username);
         localStorage.setItem('userType', 'developer');
-        window.location.href = 'pages/lobby.html';
+        window.location.href = 'lobby.html';
       } else {
         document.getElementById('devUsernameError').textContent = 'Credenciais inválidas';
         document.getElementById('devUsernameError').classList.add('show');
@@ -182,4 +176,4 @@
     });
   </script>
 </body>
-</html>
+</html> 

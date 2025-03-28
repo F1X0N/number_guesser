@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#3B82F6">
+  <meta name="description" content="Jogo dos 4 Dígitos - Lobby">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="apple-touch-icon" href="../icons/icon-192x192.png">
+  <title>Jogo dos 4 Dígitos - Lobby</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .lobby-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .create-room {
+      background: var(--card-background);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+
+    .rooms-list {
+      background: var(--card-background);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+
+    .room-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--input-background);
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .room-info {
+      flex: 1;
+    }
+
+    .room-name {
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    .room-creator {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .room-status {
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      font-size: 0.9rem;
+      margin-left: 1rem;
+    }
+
+    .status-available {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22C55E;
+    }
+
+    .status-full {
+      background: rgba(239, 68, 68, 0.2);
+      color: #EF4444;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-color);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--input-background);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      color: var(--text-color);
+    }
+
+    .user-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .user-name {
+      font-weight: 500;
+    }
+
+    .user-type {
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--border-radius);
+      font-size: 0.9rem;
+    }
+
+    .type-developer {
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--primary-color);
+    }
+
+    .type-player {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22C55E;
+    }
+
+    .logout-btn {
+      background: #EF4444;
+    }
+
+    .logout-btn:hover {
+      background: #DC2626;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Verificar se o usuário está logado
+    const username = localStorage.getItem('username');
+    const userType = localStorage.getItem('userType');
+
+    if (!username || !userType) {
+      window.location.href = '../index.html';
+    }
+  </script>
+
+  <div class="container">
+    <h1>Jogo dos 4 Dígitos</h1>
+
+    <div class="user-info">
+      <div>
+        <span class="user-name" id="userDisplayName"></span>
+        <span class="user-type" id="userTypeDisplay"></span>
+      </div>
+      <button class="logout-btn" id="logoutBtn">Sair</button>
+    </div>
+
+    <div class="lobby-container">
+      <div class="create-room">
+        <h2>Criar Sala</h2>
+        <form id="createRoomForm">
+          <div class="form-group">
+            <label for="roomName">Nome da Sala</label>
+            <input type="text" id="roomName" required minlength="3" maxlength="20">
+          </div>
+          <button type="submit">Criar Sala</button>
+        </form>
+      </div>
+
+      <div class="rooms-list">
+        <h2>Salas Disponíveis</h2>
+        <div id="roomsList">
+          <!-- As salas serão inseridas aqui dinamicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Exibir informações do usuário
+    document.getElementById('userDisplayName').textContent = username;
+    document.getElementById('userTypeDisplay').textContent = userType === 'developer' ? 'Desenvolvedor' : 'Jogador';
+    document.getElementById('userTypeDisplay').classList.add(userType === 'developer' ? 'type-developer' : 'type-player');
+
+    // Gerenciamento de salas
+    let rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
+
+    function updateRoomsList() {
+      const roomsList = document.getElementById('roomsList');
+      roomsList.innerHTML = '';
+
+      rooms.forEach(room => {
+        const roomElement = document.createElement('div');
+        roomElement.className = 'room-item';
+        
+        const isAvailable = room.players.length === 1;
+        const isCreator = room.creator === username;
+
+        roomElement.innerHTML = `
+          <div class="room-info">
+            <div class="room-name">${room.name}</div>
+            <div class="room-creator">Criado por: ${room.creator}</div>
+          </div>
+          <div class="room-status ${isAvailable ? 'status-available' : 'status-full'}">
+            ${isAvailable ? 'Disponível' : 'Cheia'}
+          </div>
+        `;
+
+        if (isAvailable && !isCreator) {
+          const joinButton = document.createElement('button');
+          joinButton.textContent = 'Entrar';
+          joinButton.className = 'join-btn';
+          joinButton.onclick = () => joinRoom(room.id);
+          roomElement.appendChild(joinButton);
+        }
+
+        roomsList.appendChild(roomElement);
+      });
+    }
+
+    // Criar sala
+    document.getElementById('createRoomForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const roomName = document.getElementById('roomName').value.trim();
+      
+      const newRoom = {
+        id: Date.now().toString(),
+        name: roomName,
+        creator: username,
+        players: [username],
+        created: new Date().toISOString()
+      };
+
+      rooms.push(newRoom);
+      localStorage.setItem('rooms', JSON.stringify(rooms));
+      
+      // Entrar na sala criada
+      joinRoom(newRoom.id);
+    });
+
+    // Entrar em uma sala
+    function joinRoom(roomId) {
+      const room = rooms.find(r => r.id === roomId);
+      if (room && room.players.length === 1) {
+        room.players.push(username);
+        localStorage.setItem('rooms', JSON.stringify(rooms));
+        localStorage.setItem('currentRoom', roomId);
+        window.location.href = 'game.html';
+      }
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('username');
+      localStorage.removeItem('userType');
+      window.location.href = 'login.html';
+    });
+
+    // Atualizar lista de salas periodicamente
+    updateRoomsList();
+    setInterval(updateRoomsList, 5000);
+  </script>
+</body>
+</html> 
