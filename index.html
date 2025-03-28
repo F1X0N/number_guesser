@@ -4,197 +4,50 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Jogo dos 4 Dígitos – Adivinhação</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    form {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      justify-content: center;
-      margin-bottom: 1rem;
-    }
-    input[type="text"],
-    input[type="number"] {
-      padding: 0.5rem;
-      font-size: 1rem;
-      width: 100px;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-    }
-    .history, .suggestion {
-      margin-top: 1rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 0.5rem;
-    }
-    table, th, td {
-      border: 1px solid #aaa;
-    }
-    th, td {
-      padding: 0.5rem;
-      text-align: center;
-    }
-    .note {
-      font-size: 0.9rem;
-      color: #555;
-      margin-top: 0.5rem;
-      text-align: center;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Jogo dos 4 Dígitos</h1>
-  <p class="note">
-    Informe seu palpite (4 dígitos) e o feedback (número de dígitos corretos na posição certa).<br>
-    Lembre: Os dígitos podem se repetir.
-  </p>
-  <form id="guessForm">
-    <input type="number" placeholder="Meu número da vez" maxlength="4" required />
-    <input type="text" id="guessInput" placeholder="Ex: 1234" maxlength="4" required pattern="\d{4}">
-    <input type="number" id="feedbackInput" placeholder="Acertos" min="0" max="4" required>
-    <button type="submit">Adicionar Palpite</button>
-    <button type="button" id="resetBtn">Nova Partida</button>
-  </form>
-  
-  <div class="history">
-    <h2>Histórico de Palpites</h2>
-    <table id="historyTable">
-      <thead>
-        <tr>
-          <th>Palpite</th>
-          <th>Acertos</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <div class="container">
+    <h1>Jogo dos 4 Dígitos</h1>
+
+    <div class="game-container">
+      <form class="choosedNumberForm">
+        <input id="generatedNumber" type="number" placeholder="Meu número da vez" maxlength="4" />
+        <button type="submit">Gerar número</button>
+      </form>
+
+      <div class="suggestion">
+        <p id="suggestionText">Nenhum palpite inserido.</p>
+        <p id="candidateCount"></p>
+      </div>
+
+      <form id="guessForm">
+        <div class="guessInputs">
+          <input type="text" id="guessInput" placeholder="Ex: 1234" maxlength="4" required pattern="\d{4}">
+          <input type="number" id="feedbackInput" placeholder="Acertos" min="0" max="4" required>
+        </div>
+        <div class="guessInputs">
+          <button type="submit">Adicionar Palpite</button>
+          <button type="button" id="resetBtn">Nova Partida</button>
+        </div>
+      </form>
+      
+      <div class="history">
+        <h2>Histórico de Palpites</h2>
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>Palpite</th>
+              <th>Acertos</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
   </div>
   
-  <div class="suggestion">
-    <h2>Sugestão</h2>
-    <p id="suggestionText">Nenhum palpite inserido.</p>
-    <p id="candidateCount"></p>
-  </div>
-  
-  <script>
-    // Gera todas as combinações de "0000" a "9999"
-    function gerarCandidatos() {
-      const candidatos = [];
-      for (let i = 0; i < 10000; i++) {
-        let numStr = i.toString().padStart(4, '0');
-        candidatos.push(numStr);
-      }
-      return candidatos;
-    }
-    
-    // Compara dois números (em string) e retorna a quantidade de dígitos que coincidem na mesma posição
-    function contarAcertos(num1, num2) {
-      let acertos = 0;
-      for (let i = 0; i < 4; i++) {
-        if (num1[i] === num2[i]) acertos++;
-      }
-      return acertos;
-    }
-    
-    // Estado da aplicação
-    let candidatos = gerarCandidatos();
-    const palpites = []; // Array de objetos { palpite: "xxxx", acertos: número }
-    
-    // Referências dos elementos da página
-    const guessForm = document.getElementById('guessForm');
-    const guessInput = document.getElementById('guessInput');
-    const feedbackInput = document.getElementById('feedbackInput');
-    const historyTableBody = document.querySelector('#historyTable tbody');
-    const suggestionText = document.getElementById('suggestionText');
-    const candidateCountText = document.getElementById('candidateCount');
-    const resetBtn = document.getElementById('resetBtn');
-    
-    // Atualiza a tabela de palpites
-    function atualizarHistorico() {
-      historyTableBody.innerHTML = '';
-      palpites.forEach(item => {
-        const row = document.createElement('tr');
-        const palpiteCell = document.createElement('td');
-        const acertosCell = document.createElement('td');
-        palpiteCell.textContent = item.palpite;
-        acertosCell.textContent = item.acertos;
-        row.appendChild(palpiteCell);
-        row.appendChild(acertosCell);
-        historyTableBody.appendChild(row);
-      });
-    }
-    
-    // Atualiza a sugestão e exibe quantos candidatos ainda são possíveis
-    function atualizarSugestao() {
-      candidateCountText.textContent = `Candidatos restantes: ${candidatos.length}`;
-      if (candidatos.length > 0) {
-        suggestionText.textContent = `Sugestão: ${candidatos[0]}`;
-      } else {
-        suggestionText.textContent = "Nenhum candidato restante. Verifique seus palpites.";
-      }
-    }
-    
-    // Filtra os candidatos válidos com base no histórico de palpites
-    function filtrarCandidatos() {
-      // Regera a lista completa e aplica os filtros de cada palpite
-      candidatos = gerarCandidatos().filter(candidate => {
-        return palpites.every(item => contarAcertos(candidate, item.palpite) === item.acertos);
-      });
-    }
-    
-    // Processa o envio do palpite
-    guessForm.addEventListener('submit', function(event) {
-      event.preventDefault();
-      
-      const palpite = guessInput.value.trim();
-      const acertos = parseInt(feedbackInput.value);
-      
-      // Validação: o palpite deve ter 4 dígitos e acertos entre 0 e 4
-      if (!/^\d{4}$/.test(palpite) || isNaN(acertos) || acertos < 0 || acertos > 4) {
-        alert("Insira um palpite válido (4 dígitos) e um número de acertos entre 0 e 4.");
-        return;
-      }
-      
-      // Adiciona o palpite ao histórico
-      palpites.push({ palpite, acertos });
-      
-      // Recalcula a lista de candidatos válidos
-      filtrarCandidatos();
-      
-      // Atualiza a interface
-      atualizarHistorico();
-      atualizarSugestao();
-      
-      // Limpa os campos e foca no palpite
-      guessInput.value = '';
-      feedbackInput.value = '';
-      guessInput.focus();
-    });
-    
-    // Reinicia a partida (limpa o histórico e reseta os candidatos)
-    resetBtn.addEventListener('click', function() {
-      if (confirm("Deseja iniciar uma nova partida? Todos os palpites serão apagados.")) {
-        palpites.length = 0;
-        candidatos = gerarCandidatos();
-        atualizarHistorico();
-        atualizarSugestao();
-      }
-    });
-    
-    // Inicializa a exibição
-    atualizarHistorico();
-    atualizarSugestao();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>

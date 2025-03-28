@@ -1,0 +1,291 @@
+:root {
+    --primary-color: #3B82F6;
+    --secondary-color: #60A5FA;
+    --background-color: #0F172A;
+    --card-background: #1E293B;
+    --text-color: #F1F5F9;
+    --text-muted: #94A3B8;
+    --border-color: #334155;
+    --input-background: #0F172A;
+    --border-radius: 8px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    --glow: 0 0 15px rgba(59, 130, 246, 0.5);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    color: var(--text-color);
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    font-weight: 600;
+    background: linear-gradient(to right, #60A5FA, #3B82F6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+  }
+
+  h2 {
+    color: var(--text-color);
+    text-align: center;
+    margin: 2rem 0 1rem;
+    font-size: 1.8rem;
+    font-weight: 500;
+  }
+
+  .game-container {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+  }
+
+  .choosedNumber {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+
+  .choosedNumber input {
+    width: 70%;
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    background: var(--input-background);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+  }
+
+  .choosedNumber input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: var(--glow);
+  }
+
+  .suggestion {
+    background: rgba(59, 130, 246, 0.1);
+    padding: 1.25rem;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(5px);
+  }
+
+  #suggestionText, #candidateCount {
+    font-weight: 500;
+    color: var(--secondary-color);
+  }
+
+  .guessInputs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  input[type="text"],
+  input[type="number"] {
+    padding: 0.75rem;
+    font-size: 1rem;
+    background: var(--input-background);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: var(--border-radius);
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: var(--glow);
+  }
+
+  input::placeholder {
+    color: var(--text-muted);
+  }
+
+  button {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-1px);
+    box-shadow: var(--glow);
+  }
+
+  button:active {
+    transform: translateY(1px);
+  }
+
+  #resetBtn {
+    background-color: #EF4444;
+  }
+
+  #resetBtn:hover {
+    background-color: #DC2626;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1rem;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+  }
+
+  th {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    padding: 1rem;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  td {
+    padding: 1rem;
+    text-align: center;
+    background: var(--input-background);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:nth-child(even) td {
+    background-color: rgba(59, 130, 246, 0.05);
+  }
+
+  @media (min-width: 768px) {
+    body {
+      padding: 3rem 2rem;
+    }
+
+    .game-container {
+      padding: 3rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .guessInputs {
+      flex-direction: column;
+    }
+
+    .suggestion {
+      flex-direction: column;
+      text-align: center;
+      gap: 0.5rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    .choosedNumber input {
+      width: 100%;
+    }
+  }
+
+  /* Animations and Effects */
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    }
+    100% {
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.2);
+    }
+  }
+
+  .game-container {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .choosedNumberForm {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .choosedNumberForm input {
+    flex: 1;
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    background: var(--input-background);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+  }
+
+  .choosedNumberForm button {
+    width: auto;
+  }
+
+  .choosedNumberForm input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: var(--glow);
+  }
+
+  @media (max-width: 640px) {
+    .choosedNumberForm {
+      flex-direction: column;
+    }
+    
+    .choosedNumberForm button {
+      width: 100%;
+    }
+  }
