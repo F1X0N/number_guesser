@@ -231,9 +231,10 @@
 
       rooms.push(newRoom);
       localStorage.setItem('rooms', JSON.stringify(rooms));
+      localStorage.setItem('currentRoom', newRoom.id);
       
-      // Entrar na sala criada
-      joinRoom(newRoom.id);
+      // Redirecionar para a página de aguardando
+      window.location.href = 'waiting.html';
     });
 
     // Entrar em uma sala

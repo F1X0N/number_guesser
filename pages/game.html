@@ -10,10 +10,83 @@
   <title>Jogo dos 4 Dígitos - Jogo</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
+  <style>
+    .players-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+
+    .player-card {
+      flex: 1;
+      text-align: center;
+      padding: 1rem;
+      margin: 0 0.5rem;
+      background: var(--input-background);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .player-card.active {
+      border-color: var(--primary-color);
+      box-shadow: var(--glow);
+    }
+
+    .player-name {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .player-status {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .status-ready {
+      color: #22C55E;
+    }
+
+    .status-waiting {
+      color: var(--primary-color);
+    }
+  </style>
 </head>
 <body>
+  <script>
+    // Verificar se o usuário está logado e em uma sala
+    const username = localStorage.getItem('username');
+    const currentRoom = localStorage.getItem('currentRoom');
+
+    if (!username || !currentRoom) {
+      window.location.href = '../index.html';
+    }
+
+    // Verificar se a sala tem dois jogadores
+    const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
+    const currentRoomData = rooms.find(r => r.id === currentRoom);
+
+    if (!currentRoomData || currentRoomData.players.length !== 2) {
+      window.location.href = 'lobby.html';
+    }
+  </script>
+
   <div class="container">
     <h1>Jogo dos 4 Dígitos</h1>
+
+    <div class="players-info">
+      <div class="player-card" id="player1Card">
+        <div class="player-name" id="player1Name"></div>
+        <div class="player-status" id="player1Status">Aguardando número...</div>
+      </div>
+      <div class="player-card" id="player2Card">
+        <div class="player-name" id="player2Name"></div>
+        <div class="player-status" id="player2Status">Aguardando número...</div>
+      </div>
+    </div>
 
     <div class="game-container">
       <form class="choosedNumberForm">
@@ -53,13 +126,9 @@
   </div>
   
   <script>
-    // Verificar se o usuário está logado e em uma sala
-    const username = localStorage.getItem('username');
-    const currentRoom = localStorage.getItem('currentRoom');
-
-    if (!username || !currentRoom) {
-      window.location.href = 'login.html';
-    }
+    // Exibir informações dos jogadores
+    document.getElementById('player1Name').textContent = currentRoomData.players[0];
+    document.getElementById('player2Name').textContent = currentRoomData.players[1];
 
     // Registrar o Service Worker
     if ('serviceWorker' in navigator) {

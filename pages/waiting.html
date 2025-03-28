@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#3B82F6">
+  <meta name="description" content="Jogo dos 4 Dígitos - Aguardando Jogador">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="apple-touch-icon" href="../icons/icon-192x192.png">
+  <title>Jogo dos 4 Dígitos - Aguardando Jogador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .waiting-container {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .room-info {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: var(--input-background);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .room-name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .room-creator {
+      color: var(--text-muted);
+    }
+
+    .waiting-message {
+      margin: 2rem 0;
+      padding: 1rem;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: var(--border-radius);
+      color: var(--primary-color);
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      margin: 2rem auto;
+      border: 4px solid var(--border-color);
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .cancel-btn {
+      background: #EF4444;
+      margin-top: 2rem;
+    }
+
+    .cancel-btn:hover {
+      background: #DC2626;
+    }
+
+    .player-list {
+      margin: 2rem 0;
+      padding: 1rem;
+      background: var(--input-background);
+      border-radius: var(--border-radius);
+    }
+
+    .player-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+    }
+
+    .player-item.ready {
+      border-left: 4px solid #22C55E;
+    }
+
+    .player-item.waiting {
+      border-left: 4px solid var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Verificar se o usuário está logado e em uma sala
+    const username = localStorage.getItem('username');
+    const currentRoom = localStorage.getItem('currentRoom');
+
+    if (!username || !currentRoom) {
+      window.location.href = '../index.html';
+    }
+  </script>
+
+  <div class="container">
+    <h1>Jogo dos 4 Dígitos</h1>
+
+    <div class="waiting-container">
+      <div class="room-info">
+        <div class="room-name" id="roomName"></div>
+        <div class="room-creator">Criado por: <span id="creatorName"></span></div>
+      </div>
+
+      <div class="waiting-message">
+        Aguardando o segundo jogador entrar...
+      </div>
+
+      <div class="loading-spinner"></div>
+
+      <div class="player-list">
+        <div class="player-item waiting" id="player1">
+          <span id="player1Name"></span>
+        </div>
+        <div class="player-item" id="player2">
+          <span>Aguardando...</span>
+        </div>
+      </div>
+
+      <button class="cancel-btn" id="cancelBtn">Cancelar Sala</button>
+    </div>
+  </div>
+
+  <script>
+    // Carregar informações da sala
+    const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
+    const currentRoomData = rooms.find(r => r.id === currentRoom);
+
+    if (!currentRoomData) {
+      window.location.href = 'lobby.html';
+    }
+
+    // Exibir informações da sala
+    document.getElementById('roomName').textContent = currentRoomData.name;
+    document.getElementById('creatorName').textContent = currentRoomData.creator;
+    document.getElementById('player1Name').textContent = currentRoomData.players[0];
+
+    // Verificar periodicamente se o segundo jogador entrou
+    function checkRoomStatus() {
+      const updatedRooms = JSON.parse(localStorage.getItem('rooms') || '[]');
+      const updatedRoom = updatedRooms.find(r => r.id === currentRoom);
+
+      if (updatedRoom && updatedRoom.players.length === 2) {
+        // Segundo jogador entrou, redirecionar para a próxima etapa
+        window.location.href = 'game.html';
+      } else if (!updatedRoom) {
+        // Sala foi removida, voltar ao lobby
+        window.location.href = 'lobby.html';
+      }
+    }
+
+    // Cancelar sala
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      const updatedRooms = rooms.filter(r => r.id !== currentRoom);
+      localStorage.setItem('rooms', JSON.stringify(updatedRooms));
+      localStorage.removeItem('currentRoom');
+      window.location.href = 'lobby.html';
+    });
+
+    // Verificar status a cada 2 segundos
+    setInterval(checkRoomStatus, 2000);
+  </script>
+</body>
+</html> 
