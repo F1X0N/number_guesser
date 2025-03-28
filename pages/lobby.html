@@ -132,7 +132,9 @@
   </style>
 </head>
 <body>
-  <script>
+  <script type="module">
+    import { observeAvailableRooms, createRoom, signOut } from '../js/firebase-operations.js';
+
     // Verificar se o usuário está logado
     const username = localStorage.getItem('username');
     const userType = localStorage.getItem('userType');
@@ -140,6 +142,100 @@
     if (!username || !userType) {
       window.location.href = '../index.html';
     }
+
+    // Exibir informações do usuário
+    document.getElementById('userDisplayName').textContent = username;
+    document.getElementById('userTypeDisplay').textContent = userType === 'developer' ? 'Desenvolvedor' : 'Jogador';
+    document.getElementById('userTypeDisplay').classList.add(userType === 'developer' ? 'type-developer' : 'type-player');
+
+    // Observar salas disponíveis
+    const unsubscribe = observeAvailableRooms((rooms) => {
+      const roomsList = document.getElementById('roomsList');
+      roomsList.innerHTML = '';
+
+      rooms.forEach(room => {
+        const roomElement = document.createElement('div');
+        roomElement.className = 'room-item';
+        
+        const isCreator = room.creator === username;
+
+        roomElement.innerHTML = `
+          <div class="room-info">
+            <div class="room-name">${room.name}</div>
+            <div class="room-creator">Criado por: ${room.creator}</div>
+          </div>
+          <div class="room-status status-available">
+            Disponível
+          </div>
+        `;
+
+        if (!isCreator) {
+          const joinButton = document.createElement('button');
+          joinButton.textContent = 'Entrar';
+          joinButton.className = 'join-btn';
+          joinButton.onclick = () => joinRoom(room.id);
+          roomElement.appendChild(joinButton);
+        }
+
+        roomsList.appendChild(roomElement);
+      });
+    });
+
+    // Criar sala
+    document.getElementById('createRoomForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const roomName = document.getElementById('roomName').value.trim();
+      
+      const roomId = Date.now().toString();
+      const newRoom = {
+        id: roomId,
+        name: roomName,
+        creator: username,
+        players: [username],
+        created: new Date().toISOString()
+      };
+
+      try {
+        await createRoom(roomId, newRoom);
+        localStorage.setItem('currentRoom', roomId);
+        window.location.href = 'waiting.html';
+      } catch (error) {
+        console.error('Erro ao criar sala:', error);
+        alert('Erro ao criar sala. Tente novamente.');
+      }
+    });
+
+    // Entrar em uma sala
+    async function joinRoom(roomId) {
+      try {
+        const currentPlayers = [username];
+        await joinRoom(roomId, currentPlayers);
+        localStorage.setItem('currentRoom', roomId);
+        window.location.href = 'waiting.html';
+      } catch (error) {
+        console.error('Erro ao entrar na sala:', error);
+        alert('Erro ao entrar na sala. Tente novamente.');
+      }
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await signOut();
+        localStorage.removeItem('username');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('currentRoom');
+        window.location.href = '../index.html';
+      } catch (error) {
+        console.error('Erro ao fazer logout:', error);
+        alert('Erro ao fazer logout. Tente novamente.');
+      }
+    });
+
+    // Limpar observador quando a página for fechada
+    window.addEventListener('beforeunload', () => {
+      unsubscribe();
+    });
   </script>
 
   <div class="container">
@@ -173,91 +269,5 @@
       </div>
     </div>
   </div>
-
-  <script>
-    // Exibir informações do usuário
-    document.getElementById('userDisplayName').textContent = username;
-    document.getElementById('userTypeDisplay').textContent = userType === 'developer' ? 'Desenvolvedor' : 'Jogador';
-    document.getElementById('userTypeDisplay').classList.add(userType === 'developer' ? 'type-developer' : 'type-player');
-
-    // Gerenciamento de salas
-    let rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-
-    function updateRoomsList() {
-      const roomsList = document.getElementById('roomsList');
-      roomsList.innerHTML = '';
-
-      rooms.forEach(room => {
-        const roomElement = document.createElement('div');
-        roomElement.className = 'room-item';
-        
-        const isAvailable = room.players.length === 1;
-        const isCreator = room.creator === username;
-
-        roomElement.innerHTML = `
-          <div class="room-info">
-            <div class="room-name">${room.name}</div>
-            <div class="room-creator">Criado por: ${room.creator}</div>
-          </div>
-          <div class="room-status ${isAvailable ? 'status-available' : 'status-full'}">
-            ${isAvailable ? 'Disponível' : 'Cheia'}
-          </div>
-        `;
-
-        if (isAvailable && !isCreator) {
-          const joinButton = document.createElement('button');
-          joinButton.textContent = 'Entrar';
-          joinButton.className = 'join-btn';
-          joinButton.onclick = () => joinRoom(room.id);
-          roomElement.appendChild(joinButton);
-        }
-
-        roomsList.appendChild(roomElement);
-      });
-    }
-
-    // Criar sala
-    document.getElementById('createRoomForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const roomName = document.getElementById('roomName').value.trim();
-      
-      const newRoom = {
-        id: Date.now().toString(),
-        name: roomName,
-        creator: username,
-        players: [username],
-        created: new Date().toISOString()
-      };
-
-      rooms.push(newRoom);
-      localStorage.setItem('rooms', JSON.stringify(rooms));
-      localStorage.setItem('currentRoom', newRoom.id);
-      
-      // Redirecionar para a página de aguardando
-      window.location.href = 'waiting.html';
-    });
-
-    // Entrar em uma sala
-    function joinRoom(roomId) {
-      const room = rooms.find(r => r.id === roomId);
-      if (room && room.players.length === 1) {
-        room.players.push(username);
-        localStorage.setItem('rooms', JSON.stringify(rooms));
-        localStorage.setItem('currentRoom', roomId);
-        window.location.href = 'game.html';
-      }
-    }
-
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      localStorage.removeItem('username');
-      localStorage.removeItem('userType');
-      window.location.href = 'login.html';
-    });
-
-    // Atualizar lista de salas periodicamente
-    updateRoomsList();
-    setInterval(updateRoomsList, 5000);
-  </script>
 </body>
 </html> 

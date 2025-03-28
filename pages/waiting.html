@@ -99,7 +99,9 @@
   </style>
 </head>
 <body>
-  <script>
+  <script type="module">
+    import { observeRoom, deleteRoom } from '../js/firebase-operations.js';
+
     // Verificar se o usuário está logado e em uma sala
     const username = localStorage.getItem('username');
     const currentRoom = localStorage.getItem('currentRoom');
@@ -107,6 +109,51 @@
     if (!username || !currentRoom) {
       window.location.href = '../index.html';
     }
+
+    // Exibir informações da sala
+    const unsubscribe = observeRoom(currentRoom, (roomData) => {
+      if (!roomData) {
+        // Sala foi removida, voltar ao lobby
+        window.location.href = 'lobby.html';
+        return;
+      }
+
+      document.getElementById('roomName').textContent = roomData.name;
+      document.getElementById('creatorName').textContent = roomData.creator;
+      document.getElementById('player1Name').textContent = roomData.players[0];
+
+      // Atualizar status do segundo jogador
+      const player2Element = document.getElementById('player2');
+      if (roomData.players.length === 2) {
+        player2Element.innerHTML = `<span>${roomData.players[1]}</span>`;
+        player2Element.classList.add('ready');
+        
+        // Redirecionar para a próxima etapa após um breve delay
+        setTimeout(() => {
+          window.location.href = 'game.html';
+        }, 1500);
+      } else {
+        player2Element.innerHTML = '<span>Aguardando...</span>';
+        player2Element.classList.remove('ready');
+      }
+    });
+
+    // Cancelar sala
+    document.getElementById('cancelBtn').addEventListener('click', async () => {
+      try {
+        await deleteRoom(currentRoom);
+        localStorage.removeItem('currentRoom');
+        window.location.href = 'lobby.html';
+      } catch (error) {
+        console.error('Erro ao cancelar sala:', error);
+        alert('Erro ao cancelar sala. Tente novamente.');
+      }
+    });
+
+    // Limpar observador quando a página for fechada
+    window.addEventListener('beforeunload', () => {
+      unsubscribe();
+    });
   </script>
 
   <div class="container">
@@ -136,45 +183,5 @@
       <button class="cancel-btn" id="cancelBtn">Cancelar Sala</button>
     </div>
   </div>
-
-  <script>
-    // Carregar informações da sala
-    const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-    const currentRoomData = rooms.find(r => r.id === currentRoom);
-
-    if (!currentRoomData) {
-      window.location.href = 'lobby.html';
-    }
-
-    // Exibir informações da sala
-    document.getElementById('roomName').textContent = currentRoomData.name;
-    document.getElementById('creatorName').textContent = currentRoomData.creator;
-    document.getElementById('player1Name').textContent = currentRoomData.players[0];
-
-    // Verificar periodicamente se o segundo jogador entrou
-    function checkRoomStatus() {
-      const updatedRooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-      const updatedRoom = updatedRooms.find(r => r.id === currentRoom);
-
-      if (updatedRoom && updatedRoom.players.length === 2) {
-        // Segundo jogador entrou, redirecionar para a próxima etapa
-        window.location.href = 'game.html';
-      } else if (!updatedRoom) {
-        // Sala foi removida, voltar ao lobby
-        window.location.href = 'lobby.html';
-      }
-    }
-
-    // Cancelar sala
-    document.getElementById('cancelBtn').addEventListener('click', () => {
-      const updatedRooms = rooms.filter(r => r.id !== currentRoom);
-      localStorage.setItem('rooms', JSON.stringify(updatedRooms));
-      localStorage.removeItem('currentRoom');
-      window.location.href = 'lobby.html';
-    });
-
-    // Verificar status a cada 2 segundos
-    setInterval(checkRoomStatus, 2000);
-  </script>
 </body>
 </html> 

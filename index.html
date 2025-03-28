@@ -79,6 +79,93 @@
   </style>
 </head>
 <body>
+  <script type="module">
+    import { signIn } from './js/auth.js';
+
+    // Verificar se o usuário já está logado
+    const username = localStorage.getItem('username');
+    if (username) {
+      window.location.href = 'pages/lobby.html';
+    }
+
+    // Gerenciamento de tabs
+    const tabs = document.querySelectorAll('.login-tab');
+    const forms = document.querySelectorAll('.login-form');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetTab = tab.dataset.tab;
+        
+        // Atualiza tabs ativas
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Atualiza formulários visíveis
+        forms.forEach(form => {
+          form.classList.remove('active');
+          if (form.id === `${targetTab}Form`) {
+            form.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // Gerenciamento de formulários
+    const userForm = document.getElementById('userForm');
+    const devForm = document.getElementById('devForm');
+
+    userForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      
+      if (username.length < 3) {
+        document.getElementById('userError').textContent = 'O nome deve ter pelo menos 3 caracteres';
+        document.getElementById('userError').classList.add('show');
+        return;
+      }
+
+      try {
+        // Fazer login no Firebase
+        await signIn(username);
+        
+        // Salva o nome do usuário e redireciona para o lobby
+        localStorage.setItem('username', username);
+        localStorage.setItem('userType', 'player');
+        window.location.href = 'pages/lobby.html';
+      } catch (error) {
+        console.error('Erro ao fazer login:', error);
+        document.getElementById('userError').textContent = 'Erro ao fazer login. Tente novamente.';
+        document.getElementById('userError').classList.add('show');
+      }
+    });
+
+    devForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('devUsername').value;
+      const password = document.getElementById('devPassword').value;
+
+      // Aqui você deve implementar a verificação das credenciais
+      // Por enquanto, vamos usar valores fixos para demonstração
+      if (username === 'admin' && password === 'admin123') {
+        try {
+          // Fazer login no Firebase
+          await signIn(username);
+          
+          localStorage.setItem('username', username);
+          localStorage.setItem('userType', 'developer');
+          window.location.href = 'pages/lobby.html';
+        } catch (error) {
+          console.error('Erro ao fazer login:', error);
+          document.getElementById('devUsernameError').textContent = 'Erro ao fazer login. Tente novamente.';
+          document.getElementById('devUsernameError').classList.add('show');
+        }
+      } else {
+        document.getElementById('devUsernameError').textContent = 'Credenciais inválidas';
+        document.getElementById('devUsernameError').classList.add('show');
+      }
+    });
+  </script>
+
   <div class="container">
     <h1>Jogo dos 4 Dígitos</h1>
     
@@ -114,72 +201,5 @@
       </form>
     </div>
   </div>
-
-  <script>
-    // Verificar se o usuário já está logado
-    const username = localStorage.getItem('username');
-    if (username) {
-      window.location.href = 'pages/lobby.html';
-    }
-
-    // Gerenciamento de tabs
-    const tabs = document.querySelectorAll('.login-tab');
-    const forms = document.querySelectorAll('.login-form');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const targetTab = tab.dataset.tab;
-        
-        // Atualiza tabs ativas
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        
-        // Atualiza formulários visíveis
-        forms.forEach(form => {
-          form.classList.remove('active');
-          if (form.id === `${targetTab}Form`) {
-            form.classList.add('active');
-          }
-        });
-      });
-    });
-
-    // Gerenciamento de formulários
-    const userForm = document.getElementById('userForm');
-    const devForm = document.getElementById('devForm');
-
-    userForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      
-      if (username.length < 3) {
-        document.getElementById('userError').textContent = 'O nome deve ter pelo menos 3 caracteres';
-        document.getElementById('userError').classList.add('show');
-        return;
-      }
-
-      // Salva o nome do usuário e redireciona para o lobby
-      localStorage.setItem('username', username);
-      localStorage.setItem('userType', 'player');
-      window.location.href = 'pages/lobby.html';
-    });
-
-    devForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = document.getElementById('devUsername').value;
-      const password = document.getElementById('devPassword').value;
-
-      // Aqui você deve implementar a verificação das credenciais
-      // Por enquanto, vamos usar valores fixos para demonstração
-      if (username === 'admin' && password === 'admin123') {
-        localStorage.setItem('username', username);
-        localStorage.setItem('userType', 'developer');
-        window.location.href = 'pages/lobby.html';
-      } else {
-        document.getElementById('devUsernameError').textContent = 'Credenciais inválidas';
-        document.getElementById('devUsernameError').classList.add('show');
-      }
-    });
-  </script>
 </body>
 </html>
