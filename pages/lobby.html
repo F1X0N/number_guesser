@@ -129,87 +129,238 @@
     .logout-btn:hover {
       background: #DC2626;
     }
+
+    .rooms-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background: var(--primary-color-dark);
+    }
+
+    .refresh-icon {
+      font-size: 1.2rem;
+    }
+
+    .no-rooms {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      background: var(--input-background);
+      border-radius: var(--border-radius);
+      border: 1px dashed var(--border-color);
+    }
   </style>
 </head>
 <body>
   <script type="module">
-    import { observeAvailableRooms, createRoom, signOut } from '../js/firebase-operations.js';
+    import { observeAvailableRooms, createRoom, joinRoom } from '../js/firebase-operations.js';
+    import { signOut } from '../js/auth.js';
+    import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { database } from '../js/firebase-config.js';
 
-    // Verificar se o usuário está logado
-    const username = localStorage.getItem('username');
-    const userType = localStorage.getItem('userType');
-
-    if (!username || !userType) {
-      window.location.href = '../index.html';
-    }
-
-    // Exibir informações do usuário
-    document.getElementById('userDisplayName').textContent = username;
-    document.getElementById('userTypeDisplay').textContent = userType === 'developer' ? 'Desenvolvedor' : 'Jogador';
-    document.getElementById('userTypeDisplay').classList.add(userType === 'developer' ? 'type-developer' : 'type-player');
-
-    // Observar salas disponíveis
-    const unsubscribe = observeAvailableRooms((rooms) => {
+    // Função para atualizar a lista de salas
+    async function updateRoomsList(rooms) {
+      console.log('Atualizando lista de salas:', rooms);
       const roomsList = document.getElementById('roomsList');
       roomsList.innerHTML = '';
+
+      if (!rooms || rooms.length === 0) {
+        roomsList.innerHTML = `
+          <div class="no-rooms">
+            Nenhuma sala disponível no momento
+          </div>
+        `;
+        return;
+      }
 
       rooms.forEach(room => {
         const roomElement = document.createElement('div');
         roomElement.className = 'room-item';
         
-        const isCreator = room.creator === username;
+        const isCreator = room.creator === userUid;
+        console.log('Processando sala:', {
+          id: room.id,
+          name: room.name,
+          creator: room.creator,
+          userUid: userUid,
+          isCreator: isCreator,
+          players: room.players,
+          status: room.status
+        });
 
         roomElement.innerHTML = `
           <div class="room-info">
             <div class="room-name">${room.name}</div>
-            <div class="room-creator">Criado por: ${room.creator}</div>
+            <div class="room-creator">Criado por: ${room.creator === userUid ? 'Você' : username}</div>
           </div>
-          <div class="room-status status-available">
-            Disponível
+          <div class="room-status ${room.status === 'waiting' ? 'status-available' : 'status-full'}">
+            ${room.status === 'waiting' ? 'Disponível' : 'Em jogo'}
           </div>
         `;
 
-        if (!isCreator) {
+        if (!isCreator && room.status === 'waiting') {
           const joinButton = document.createElement('button');
           joinButton.textContent = 'Entrar';
           joinButton.className = 'join-btn';
-          joinButton.onclick = () => joinRoom(room.id);
+          joinButton.onclick = () => handleJoinRoom(room.id);
           roomElement.appendChild(joinButton);
         }
 
         roomsList.appendChild(roomElement);
       });
-    });
+    }
 
-    // Criar sala
-    document.getElementById('createRoomForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const roomName = document.getElementById('roomName').value.trim();
-      
-      const roomId = Date.now().toString();
-      const newRoom = {
-        id: roomId,
-        name: roomName,
-        creator: username,
-        players: [username],
-        created: new Date().toISOString()
-      };
+    // Função para inicializar o lobby
+    async function initializeLobby() {
+      // Verificar se o usuário está logado
+      const username = localStorage.getItem('username');
+      const userType = localStorage.getItem('userType');
+      const userUid = localStorage.getItem('userUid');
 
-      try {
-        await createRoom(roomId, newRoom);
-        localStorage.setItem('currentRoom', roomId);
-        window.location.href = 'waiting.html';
-      } catch (error) {
-        console.error('Erro ao criar sala:', error);
-        alert('Erro ao criar sala. Tente novamente.');
+      if (!username || !userType || !userUid) {
+        console.error('Dados do usuário não encontrados:', { username, userType, userUid });
+        window.location.href = '../index.html';
+        return;
       }
-    });
 
-    // Entrar em uma sala
-    async function joinRoom(roomId) {
+      console.log('Dados do usuário carregados:', { username, userType, userUid });
+
+      // Exibir informações do usuário
+      document.getElementById('userDisplayName').textContent = username;
+      document.getElementById('userTypeDisplay').textContent = userType === 'developer' ? 'Desenvolvedor' : 'Jogador';
+      document.getElementById('userTypeDisplay').classList.add(userType === 'developer' ? 'type-developer' : 'type-player');
+
+      // Observar salas disponíveis
+      console.log('Iniciando observação de salas para usuário:', username);
+      let unsubscribe = null;
+
       try {
-        const currentPlayers = [username];
-        await joinRoom(roomId, currentPlayers);
+        unsubscribe = observeAvailableRooms((rooms) => {
+          console.log('Recebida atualização de salas para:', username, rooms);
+          updateRoomsList(rooms);
+        });
+
+        // Adicionar evento de atualização manual
+        document.getElementById('refreshRooms').addEventListener('click', () => {
+          console.log('Atualização manual solicitada');
+          const roomsRef = ref(database, 'rooms');
+          onValue(roomsRef, (snapshot) => {
+            const rooms = snapshot.val() || {};
+            console.log('Dados brutos recebidos na atualização manual:', rooms);
+            
+            const roomsArray = Object.entries(rooms).map(([id, room]) => ({
+              id,
+              ...room
+            }));
+            
+            const availableRooms = roomsArray.filter(room => {
+              if (!room || !room.players) {
+                console.log('Sala inválida na atualização manual:', room);
+                return false;
+              }
+              
+              const players = room.players;
+              const isAvailable = Object.keys(players).length === 1 && 
+                                players['0'] && 
+                                room.status === 'waiting';
+              
+              console.log('Verificando sala na atualização manual:', room.name, {
+                playersCount: Object.keys(players).length,
+                hasPlayer0: !!players['0'],
+                status: room.status,
+                isAvailable
+              });
+              
+              return isAvailable;
+            });
+            
+            console.log('Salas disponíveis na atualização manual:', availableRooms);
+            updateRoomsList(availableRooms);
+          });
+        });
+      } catch (error) {
+        console.error('Erro ao iniciar observador de salas:', error);
+      }
+
+      // Criar sala
+      document.getElementById('createRoomForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const roomName = document.getElementById('roomName').value.trim();
+        
+        if (roomName.length < 3 || roomName.length > 20) {
+          alert('O nome da sala deve ter entre 3 e 20 caracteres');
+          return;
+        }
+
+        try {
+          // Criar a sala e aguardar a confirmação
+          const roomId = await createRoom(null, { name: roomName });
+          
+          if (!roomId) {
+            throw new Error('Falha ao criar sala');
+          }
+
+          // Salvar o ID da sala no localStorage
+          localStorage.setItem('currentRoom', roomId);
+          
+          // Redirecionar apenas após confirmar que a sala foi criada
+          window.location.href = 'waiting.html';
+        } catch (error) {
+          console.error('Erro ao criar sala:', error);
+          alert('Erro ao criar sala. Tente novamente.');
+        }
+      });
+
+      // Logout
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try {
+          await signOut();
+          localStorage.removeItem('username');
+          localStorage.removeItem('userType');
+          localStorage.removeItem('userUid');
+          localStorage.removeItem('currentRoom');
+          window.location.href = '../index.html';
+        } catch (error) {
+          console.error('Erro ao fazer logout:', error);
+          alert('Erro ao fazer logout. Tente novamente.');
+        }
+      });
+
+      // Limpar observador quando a página for fechada
+      window.addEventListener('beforeunload', () => {
+        console.log('Removendo observador de salas para:', username);
+        if (unsubscribe) {
+          unsubscribe();
+        }
+      });
+    }
+
+    // Função para entrar em uma sala
+    async function handleJoinRoom(roomId) {
+      try {
+        const success = await joinRoom(roomId);
+        
+        if (!success) {
+          throw new Error('Falha ao entrar na sala');
+        }
+
         localStorage.setItem('currentRoom', roomId);
         window.location.href = 'waiting.html';
       } catch (error) {
@@ -218,23 +369,10 @@
       }
     }
 
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try {
-        await signOut();
-        localStorage.removeItem('username');
-        localStorage.removeItem('userType');
-        localStorage.removeItem('currentRoom');
-        window.location.href = '../index.html';
-      } catch (error) {
-        console.error('Erro ao fazer logout:', error);
-        alert('Erro ao fazer logout. Tente novamente.');
-      }
-    });
-
-    // Limpar observador quando a página for fechada
-    window.addEventListener('beforeunload', () => {
-      unsubscribe();
+    // Inicializar o lobby
+    initializeLobby().catch(error => {
+      console.error('Erro ao inicializar lobby:', error);
+      alert('Erro ao inicializar o lobby. Recarregue a página.');
     });
   </script>
 
@@ -262,7 +400,13 @@
       </div>
 
       <div class="rooms-list">
-        <h2>Salas Disponíveis</h2>
+        <div class="rooms-header">
+          <h2>Salas Disponíveis</h2>
+          <button id="refreshRooms" class="refresh-btn">
+            <span class="refresh-icon">🔄</span>
+            Atualizar
+          </button>
+        </div>
         <div id="roomsList">
           <!-- As salas serão inseridas aqui dinamicamente -->
         </div>
