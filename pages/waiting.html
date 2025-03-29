@@ -40,36 +40,94 @@
       color: var(--text-muted);
     }
 
+    .number-input-container {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: var(--input-background);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .number-input {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+
+    .number-input input {
+      width: 60px;
+      height: 60px;
+      text-align: center;
+      font-size: 1.5rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--border-radius);
+      background: var(--card-background);
+      color: var(--text-color);
+    }
+
+    .number-input input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .number-input input:disabled {
+      background: var(--input-background);
+      cursor: not-allowed;
+    }
+
+    .number-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .btn-generate {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-generate:hover {
+      background: var(--primary-color-dark);
+    }
+
+    .btn-confirm {
+      background: #22C55E;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-confirm:hover {
+      background: #16A34A;
+    }
+
+    .btn-confirm:disabled {
+      background: #9CA3AF;
+      cursor: not-allowed;
+    }
+
+    .error-message {
+      color: #EF4444;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+    }
+
     .waiting-message {
       margin: 2rem 0;
       padding: 1rem;
       background: rgba(59, 130, 246, 0.1);
       border-radius: var(--border-radius);
       color: var(--primary-color);
-    }
-
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      margin: 2rem auto;
-      border: 4px solid var(--border-color);
-      border-top: 4px solid var(--primary-color);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .cancel-btn {
-      background: #EF4444;
-      margin-top: 2rem;
-    }
-
-    .cancel-btn:hover {
-      background: #DC2626;
     }
 
     .player-list {
@@ -80,61 +138,273 @@
     }
 
     .player-item {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.5rem;
+      padding: 1rem;
       margin: 0.5rem 0;
       background: var(--card-background);
       border-radius: var(--border-radius);
+      border-left: 4px solid var(--text-muted);
+      transition: all 0.3s ease;
     }
 
     .player-item.ready {
-      border-left: 4px solid #22C55E;
+      border-left-color: #22C55E;
     }
 
     .player-item.waiting {
-      border-left: 4px solid var(--primary-color);
+      border-left-color: var(--primary-color);
+      opacity: 0.7;
+    }
+
+    .player-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .player-name {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .player-number-status {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .status-icon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.5rem;
+      background-color: var(--text-muted);
+    }
+
+    .ready .status-icon {
+      background-color: #22C55E;
+    }
+
+    .waiting .status-icon {
+      background-color: var(--primary-color);
     }
   </style>
 </head>
 <body>
+  <script>
+    // Código para verificar se devemos redirecionar para a página de jogo
+    // quando a página for carregada (para garantir que o redirecionamento funcione)
+    window.addEventListener('DOMContentLoaded', async () => {
+      const currentRoom = localStorage.getItem('currentRoom');
+      if (currentRoom) {
+        try {
+          // Importações necessárias
+          const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
+          const { app } = await import('../js/firebase-config.js');
+          
+          const database = getDatabase(app);
+          const roomRef = ref(database, `rooms/${currentRoom}`);
+          
+          const snapshot = await get(roomRef);
+          const roomData = snapshot.val();
+          
+          if (roomData && roomData.status === 'playing') {
+            console.log('Sala já em jogo, redirecionando...');
+            window.location.href = 'game.html';
+          }
+        } catch (error) {
+          console.error('Erro ao verificar status da sala:', error);
+        }
+      }
+    });
+  </script>
   <script type="module">
-    import { observeRoom, deleteRoom } from '../js/firebase-operations.js';
+    import { observeRoom, deleteRoom, setPlayerNumber, checkGameStart } from '../js/firebase-operations.js';
+    import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { database } from '../js/firebase-config.js';
 
     // Verificar se o usuário está logado e em uma sala
     const username = localStorage.getItem('username');
     const currentRoom = localStorage.getItem('currentRoom');
+    const userUid = localStorage.getItem('userUid');
 
-    if (!username || !currentRoom) {
+    if (!username || !currentRoom || !userUid) {
       window.location.href = '../index.html';
     }
 
-    // Exibir informações da sala
+    console.log('Inicializando sala de espera:', {
+      username,
+      currentRoom,
+      userUid
+    });
+
+    // Elementos da interface
+    const numberInputs = Array.from({ length: 4 }, (_, i) => {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.maxLength = 1;
+      input.pattern = '[0-9]';
+      input.required = true;
+      input.dataset.index = i;
+      return input;
+    });
+
+    const numberInputContainer = document.getElementById('numberInputContainer');
+    numberInputs.forEach(input => numberInputContainer.appendChild(input));
+
+    // Função para gerar número aleatório
+    function generateRandomNumber() {
+      const number = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      numberInputs.forEach((input, i) => {
+        input.value = number[i];
+      });
+    }
+
+    // Função para validar número
+    function validateNumber() {
+      const number = numberInputs.map(input => input.value).join('');
+      return /^\d{4}$/.test(number);
+    }
+
+    // Eventos dos inputs
+    numberInputs.forEach((input, index) => {
+      input.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (value.length === 1 && index < 3) {
+          numberInputs[index + 1].focus();
+        }
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !value && index > 0) {
+          numberInputs[index - 1].focus();
+        }
+      });
+    });
+
+    // Evento do botão gerar
+    document.getElementById('generateBtn').addEventListener('click', generateRandomNumber);
+
+    // Observar mudanças na sala
+    let redirectionInProgress = false;
     const unsubscribe = observeRoom(currentRoom, (roomData) => {
       if (!roomData) {
-        // Sala foi removida, voltar ao lobby
+        console.error('Sala não encontrada');
         window.location.href = 'lobby.html';
         return;
       }
 
-      document.getElementById('roomName').textContent = roomData.name;
-      document.getElementById('creatorName').textContent = roomData.creator;
-      document.getElementById('player1Name').textContent = roomData.players[0];
+      console.log('Dados da sala atualizados:', roomData);
 
-      // Atualizar status do segundo jogador
-      const player2Element = document.getElementById('player2');
-      if (roomData.players.length === 2) {
-        player2Element.innerHTML = `<span>${roomData.players[1]}</span>`;
-        player2Element.classList.add('ready');
+      // Verificar se o jogo começou primeiro
+      if (roomData.status === 'playing' && !redirectionInProgress) {
+        console.log('Jogo iniciado, redirecionando para game.html...', roomData);
         
-        // Redirecionar para a próxima etapa após um breve delay
-        setTimeout(() => {
-          window.location.href = 'game.html';
-        }, 1500);
-      } else {
-        player2Element.innerHTML = '<span>Aguardando...</span>';
-        player2Element.classList.remove('ready');
+        // Evitar múltiplos redirecionamentos
+        redirectionInProgress = true;
+        
+        // Armazenar dados do jogo no localStorage para acesso na próxima página
+        localStorage.setItem('gameStarted', 'true');
+        localStorage.setItem('gameData', JSON.stringify({
+          roomId: currentRoom,
+          playerNumbers: roomData.playerNumbers,
+          status: 'playing',
+          startTime: roomData.gameStarted
+        }));
+        
+        // Exibir mensagem de redirecionamento
+        document.getElementById('redirectingMessage').style.display = 'block';
+        
+        // Usar uma abordagem diferente para o redirecionamento
+        // Isso evita problemas de cache e histórico do navegador
+        const gameUrl = new URL('game.html', window.location.href);
+        gameUrl.searchParams.set('t', Date.now()); // Evitar cache
+        
+        // Criar um formulário e enviar para a página de jogo
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = gameUrl.toString();
+        document.body.appendChild(form);
+        
+        console.log('Redirecionando via formulário para:', gameUrl.toString());
+        form.submit();
+        
+        return;
+      }
+
+      // Atualizar informações da sala
+      const roomNameElement = document.getElementById('roomName');
+      const creatorNameElement = document.getElementById('creatorName');
+      if (roomNameElement) roomNameElement.textContent = roomData.name || '';
+      if (creatorNameElement) creatorNameElement.textContent = roomData.creator || '';
+
+      // Atualizar status dos jogadores
+      const playerStatuses = roomData.playerStatus || {};
+      const playerNumbers = roomData.playerNumbers || {};
+      const players = roomData.players || {};
+      
+      // Atualizar informações do jogador 1
+      const player1NameEl = document.getElementById('player1Name');
+      const player1StatusEl = document.getElementById('player1Status');
+      const player1NumberEl = document.getElementById('player1Number');
+      const player1Item = document.getElementById('player1');
+      
+      if (player1NameEl && players['0']) {
+        player1NameEl.textContent = players['0'] === userUid ? 'Você' : 'Jogador 1';
+      }
+      if (player1StatusEl) {
+        const status = playerStatuses['0'] || 'aguardando';
+        player1StatusEl.textContent = status === 'ready' ? 'Pronto' : 'Escolhendo número';
+        player1Item?.classList.toggle('ready', status === 'ready');
+      }
+      if (player1NumberEl) {
+        player1NumberEl.textContent = playerNumbers['0'] ? 'Número definido' : 'Aguardando número';
+      }
+
+      // Atualizar informações do jogador 2
+      const player2NameEl = document.getElementById('player2Name');
+      const player2StatusEl = document.getElementById('player2Status');
+      const player2NumberEl = document.getElementById('player2Number');
+      const player2Item = document.getElementById('player2');
+      
+      if (player2NameEl) {
+        if (players['1']) {
+          player2NameEl.textContent = players['1'] === userUid ? 'Você' : 'Jogador 2';
+          player2Item?.classList.remove('waiting');
+        } else {
+          player2NameEl.textContent = 'Aguardando jogador...';
+          player2Item?.classList.add('waiting');
+        }
+      }
+      if (player2StatusEl && players['1']) {
+        const status = playerStatuses['1'] || 'aguardando';
+        player2StatusEl.textContent = status === 'ready' ? 'Pronto' : 'Escolhendo número';
+        player2Item?.classList.toggle('ready', status === 'ready');
+      }
+      if (player2NumberEl && players['1']) {
+        player2NumberEl.textContent = playerNumbers['1'] ? 'Número definido' : 'Aguardando número';
+      }
+    });
+
+    // Evento do botão confirmar
+    document.getElementById('confirmBtn').addEventListener('click', async () => {
+      if (!validateNumber()) {
+        document.getElementById('errorMessage').textContent = 'Por favor, insira um número válido de 4 dígitos';
+        return;
+      }
+
+      const number = numberInputs.map(input => input.value).join('');
+      
+      try {
+        document.getElementById('confirmBtn').disabled = true;
+        await setPlayerNumber(currentRoom, number);
+        numberInputs.forEach(input => input.disabled = true);
+        document.getElementById('generateBtn').disabled = true;
+        document.getElementById('errorMessage').textContent = '';
+      } catch (error) {
+        console.error('Erro ao definir número:', error);
+        document.getElementById('errorMessage').textContent = error.message;
+        document.getElementById('confirmBtn').disabled = false;
       }
     });
 
@@ -160,23 +430,45 @@
     <h1>Jogo dos 4 Dígitos</h1>
 
     <div class="waiting-container">
+      <div id="redirectingMessage" style="display: none; background-color: #10B981; color: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+        Ambos jogadores prontos! Redirecionando para o jogo...
+      </div>
+      
       <div class="room-info">
         <div class="room-name" id="roomName"></div>
         <div class="room-creator">Criado por: <span id="creatorName"></span></div>
       </div>
 
-      <div class="waiting-message">
-        Aguardando o segundo jogador entrar...
+      <div class="number-input-container">
+        <h3>Escolha seu número de 4 dígitos</h3>
+        <div class="number-input" id="numberInputContainer"></div>
+        <div class="number-actions">
+          <button class="btn-generate" id="generateBtn">Gerar Número</button>
+          <button class="btn-confirm" id="confirmBtn">Confirmar</button>
+        </div>
+        <div class="error-message" id="errorMessage"></div>
       </div>
 
-      <div class="loading-spinner"></div>
-
       <div class="player-list">
-        <div class="player-item waiting" id="player1">
-          <span id="player1Name"></span>
+        <div class="player-item" id="player1">
+          <div class="player-info">
+            <span class="player-name" id="player1Name">Jogador 1</span>
+            <div class="player-status">
+              <span class="status-icon"></span>
+              <span id="player1Status">Aguardando</span>
+            </div>
+            <div class="player-number-status" id="player1Number">Aguardando número</div>
+          </div>
         </div>
         <div class="player-item" id="player2">
-          <span>Aguardando...</span>
+          <div class="player-info">
+            <span class="player-name" id="player2Name">Jogador 2</span>
+            <div class="player-status">
+              <span class="status-icon"></span>
+              <span id="player2Status">Aguardando</span>
+            </div>
+            <div class="player-number-status" id="player2Number">Aguardando número</div>
+          </div>
         </div>
       </div>
 

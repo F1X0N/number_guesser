@@ -4,28 +4,99 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#3B82F6">
-  <meta name="description" content="Jogo dos 4 Dígitos - Jogo">
+  <meta name="description" content="Jogo dos 4 Dígitos - Partida">
+  <!-- Meta tags para prevenir cache -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <link rel="manifest" href="../manifest.json">
   <link rel="apple-touch-icon" href="../icons/icon-192x192.png">
-  <title>Jogo dos 4 Dígitos - Jogo</title>
+  <title>Jogo dos 4 Dígitos - Partida</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
   <style>
-    .players-info {
+    /* Reset de estilos */
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 2rem;
+      flex-direction: column;
+    }
+
+    /* Estilos base */
+    .container {
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    /* Layout dos jogadores */
+    .game-status-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1rem;
       padding: 1rem;
       background: var(--card-background);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow);
     }
 
+    @media (min-width: 768px) {
+      .game-status-cards {
+        flex-direction: row;
+      }
+    }
+
+    .status-card {
+      flex: 1;
+      text-align: center;
+      padding: 1.25rem;
+      background: var(--input-background);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .status-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .status-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .status-detail {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
     .player-card {
       flex: 1;
       text-align: center;
       padding: 1rem;
-      margin: 0 0.5rem;
       background: var(--input-background);
       border-radius: var(--border-radius);
       border: 1px solid var(--border-color);
@@ -39,6 +110,7 @@
     .player-name {
       font-weight: 500;
       margin-bottom: 0.5rem;
+      font-size: 1.1rem;
     }
 
     .player-status {
@@ -53,96 +125,893 @@
     .status-waiting {
       color: var(--primary-color);
     }
+    
+    /* Seção de último palpite */
+    .last-guess-section {
+      margin: 1rem;
+      padding: 1rem;
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .last-guess-section h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .last-guess-display {
+      font-size: 1.2rem;
+      font-weight: 600;
+      padding: 0.75rem;
+      background: var(--input-background);
+      border-radius: var(--border-radius);
+      margin-top: 0.5rem;
+    }
+
+    .last-guess-result {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .game-over .opponent-number {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-top: 0.5rem;
+    }
+    
+    /* Container do jogo */
+    .game-container {
+      margin: 1rem;
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      flex: 1;
+    }
+    
+    /* Display do número */
+    .my-number-display {
+      font-size: 1.1rem;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      background-color: var(--input-background);
+      border-radius: var(--border-radius);
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    /* Formulário de palpite */
+    .guessInputs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+    .guessInputs {
+        flex-direction: row;
+      }
+    }
+
+    .guessInputs input {
+      flex: 1;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .guessInputs button {
+      width: 100%;
+      padding: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      .guessInputs button {
+        width: auto;
+      }
+    }
+    
+    /* Histórico de palpites */
+    .game-history {
+      margin: 1rem 0;
+    }
+
+    .history-section {
+      width: 100%;
+    }
+
+    .history-section h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+      background: var(--input-background);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+    }
+    
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    th {
+      background: var(--card-background);
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--card-background);
+    }
+
+    /* Indicador de turno */
+    .turn-indicator {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1rem;
+      margin: 0;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+      background: var(--card-background);
+      box-shadow: var(--shadow);
+      border-radius: 0;
+      transition: all 0.3s ease;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .my-turn {
+      background-color: #10B981;
+      color: white;
+    }
+    
+    .opponent-turn {
+      background-color: #F59E0B;
+      color: white;
+    }
+    
+    .game-over {
+      background-color: #6B7280;
+      color: white;
+    }
+    
+    /* Botões de ação */
+    .game-actions {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .game-actions {
+        flex-direction: row;
+      }
+    }
+
+    .game-actions button {
+      width: 100%;
+      padding: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      .game-actions button {
+        width: auto;
+        flex: 1;
+      }
+    }
+    
+    /* Seção do administrador */
+    .admin-section {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+
+    .admin-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .admin-info {
+        flex-direction: row;
+      }
+    }
+
+    .candidates-info, .suggested-numbers {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--input-background);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .candidates-info h4, .suggested-numbers h4 {
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+      font-size: 0.9rem;
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: var(--card-background);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      max-width: 90%;
+      width: 400px;
+      text-align: center;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .modal-content p {
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .modal-actions {
+        flex-direction: row;
+      }
+    }
+
+    .modal-actions button {
+      width: 100%;
+      padding: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      .modal-actions button {
+        width: auto;
+        flex: 1;
+      }
+    }
   </style>
 </head>
 <body>
-  <script>
-    // Verificar se o usuário está logado e em uma sala
-    const username = localStorage.getItem('username');
-    const currentRoom = localStorage.getItem('currentRoom');
-
-    if (!username || !currentRoom) {
-      window.location.href = '../index.html';
-    }
-
-    // Verificar se a sala tem dois jogadores
-    const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-    const currentRoomData = rooms.find(r => r.id === currentRoom);
-
-    if (!currentRoomData || currentRoomData.players.length !== 2) {
-      window.location.href = 'lobby.html';
-    }
-  </script>
-
   <div class="container">
-    <h1>Jogo dos 4 Dígitos</h1>
+    <div class="turn-indicator" id="turnIndicator">Aguardando...</div>
 
-    <div class="players-info">
+    <!-- <div class="players-info">
       <div class="player-card" id="player1Card">
-        <div class="player-name" id="player1Name"></div>
+        <div class="player-name" id="player1Name">Jogador 1</div>
         <div class="player-status" id="player1Status">Aguardando número...</div>
       </div>
       <div class="player-card" id="player2Card">
-        <div class="player-name" id="player2Name"></div>
+        <div class="player-name" id="player2Name">Jogador 2</div>
         <div class="player-status" id="player2Status">Aguardando número...</div>
+      </div>
+    </div> -->
+
+    <div class="game-status-cards">
+      <div class="status-card" id="myNumberCard">
+        <h3>Seu Número</h3>
+        <div class="status-value" id="myNumberDisplay">????</div>
+      </div>
+      <div class="status-card" id="lastGuessCard">
+        <h3>Último Palpite</h3>
+        <div class="status-value" id="lastGuessDisplay">-</div>
+        <div class="status-detail" id="lastGuessResult">-</div>
       </div>
     </div>
 
-    <div class="game-container">
-      <form class="choosedNumberForm">
-        <input id="generatedNumber" type="number" placeholder="Meu número da vez" maxlength="4" />
-        <button type="submit">Gerar número</button>
-      </form>
+    <!-- <div class="last-guess-section">
+      <h3>Último Palpite</h3>
+      <div class="last-guess-display" id="lastGuessDisplay">-</div>
+      <div class="last-guess-result" id="lastGuessResult">-</div>
+    </div> -->
 
-      <div class="suggestion">
-        <p id="suggestionText">Nenhum palpite inserido.</p>
-        <p id="candidateCount"></p>
+    <div class="game-container">
+      <!-- Seção de números sugeridos e candidatos (apenas para administradores) -->
+      <div id="adminSection" class="admin-section" style="display: none;">
+        <h3>Informações do Administrador</h3>
+        <div class="admin-info">
+          <div class="candidates-info">
+            <h4>Candidatos Restantes</h4>
+            <p id="remainingCandidates">Carregando...</p>
+          </div>
+          <div class="suggested-numbers">
+            <h4>Números Sugeridos</h4>
+            <p id="suggestedNumbers">Carregando...</p>
+          </div>
+        </div>
       </div>
+
+      <!-- <div class="my-number-display">
+        Seu número: <span id="myNumberDisplay">????</span>
+      </div> -->
 
       <form id="guessForm">
         <div class="guessInputs">
-          <input type="text" id="guessInput" placeholder="Ex: 1234" maxlength="4" required pattern="\d{4}">
-          <input type="number" id="feedbackInput" placeholder="Acertos" min="0" max="4" required>
-        </div>
-        <div class="guessInputs">
-          <button type="submit">Adicionar Palpite</button>
-          <button type="button" id="resetBtn">Nova Partida</button>
+          <input type="text" id="guessInput" placeholder="Digite seu palpite (4 dígitos)" maxlength="4" required pattern="\d{4}">
+          <button type="submit">Enviar Palpite</button>
         </div>
       </form>
-      
-      <div class="history">
-        <h2>Histórico de Palpites</h2>
-        <table id="historyTable">
-          <thead>
-            <tr>
-              <th>Palpite</th>
-              <th>Acertos</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+
+      <div class="game-history">
+        <div class="history-section">
+          <h3>Meus Palpites</h3>
+          <table id="myHistoryTable">
+            <thead>
+              <tr>
+                <th>Palpite</th>
+                <th>Acertos</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="game-actions">
+        <button type="button" id="newGameBtn">Nova Partida</button>
+        <button type="button" id="endSessionBtn">Encerrar Sessão</button>
+        <button type="button" id="lobbyBtn">Voltar ao Lobby</button>
+      </div>
+    </div>
+    
+    <!-- Modal de fim de jogo -->
+    <div id="gameEndModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h2>Fim de Jogo!</h2>
+        <p>Vencedor: <span id="winnerName">-</span></p>
+        <p>Duração da partida: <span id="gameDuration">-</span></p>
+        <div class="modal-actions">
+          <button id="modalNewGameBtn">Nova Partida</button>
+          <button id="modalEndSessionBtn">Encerrar Sessão</button>
+        </div>
       </div>
     </div>
   </div>
   
-  <script>
-    // Exibir informações dos jogadores
-    document.getElementById('player1Name').textContent = currentRoomData.players[0];
-    document.getElementById('player2Name').textContent = currentRoomData.players[1];
+  <script type="module">
+    // Importar configuração do Firebase
+    import { firebaseConfig } from '../js/config.js';
 
-    // Registrar o Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('../service-worker.js')
-          .then(registration => {
-            console.log('ServiceWorker registrado com sucesso:', registration.scope);
-          })
-          .catch(error => {
-            console.log('Falha ao registrar o ServiceWorker:', error);
-          });
+    // Importar e inicializar o Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getDatabase, 
+      ref, 
+      get, 
+      set, 
+      update, 
+      onValue 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Inicializar o Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Variáveis globais do jogo
+    let currentPlayerTurn = null;
+    let myNumber = null;
+    let opponentNumber = null;
+    let myPlayerIndex = null;
+    let opponentPlayerIndex = null;
+    let isMyTurn = false;
+    let gameStartTime = null;
+    let userType = null;
+    let gameFinished = false;
+    let currentRoom = null;
+
+    // Funções do jogo
+    function gerarCandidatos() {
+      const candidatos = [];
+      for (let i = 0; i < 10000; i++) {
+        let numStr = i.toString().padStart(4, '0');
+        candidatos.push(numStr);
+      }
+      return candidatos;
+    }
+
+    function contarAcertos(num1, num2) {
+      let acertos = 0;
+      for (let i = 0; i < 4; i++) {
+        if (num1[i] === num2[i]) acertos++;
+      }
+      return acertos;
+    }
+
+    function validarPalpite(palpite) {
+      return /^\d{4}$/.test(palpite);
+    }
+
+    function atualizarHistorico(historico, tabela) {
+      if (!tabela) return;
+      
+      tabela.innerHTML = '';
+      historico.forEach(item => {
+        const row = document.createElement('tr');
+        const palpiteCell = document.createElement('td');
+        const acertosCell = document.createElement('td');
+        palpiteCell.textContent = item.number;
+        acertosCell.textContent = item.hits;
+        row.appendChild(palpiteCell);
+        row.appendChild(acertosCell);
+        tabela.appendChild(row);
       });
     }
+
+    function updateTurnStatus(isMyTurn, gameFinished) {
+      const turnIndicator = document.getElementById('turnIndicator');
+      const guessForm = document.getElementById('guessForm');
+      const guessInput = document.getElementById('guessInput');
+      const submitBtn = document.querySelector('#guessForm button[type="submit"]');
+      
+      if (gameFinished) {
+        turnIndicator.textContent = 'Jogo finalizado';
+        turnIndicator.className = 'turn-indicator game-over';
+        guessInput.disabled = true;
+        submitBtn.disabled = true;
+        return;
+      }
+      
+      if (isMyTurn) {
+        turnIndicator.textContent = 'Seu turno! Faça um palpite.';
+        turnIndicator.className = 'turn-indicator my-turn';
+        guessInput.disabled = false;
+        submitBtn.disabled = false;
+      } else {
+        turnIndicator.textContent = 'Aguardando o palpite do oponente...';
+        turnIndicator.className = 'turn-indicator opponent-turn';
+        guessInput.disabled = true;
+        submitBtn.disabled = true;
+      }
+    }
+    
+    function updateGuessHistory(guesses, myPlayerIndex, opponentPlayerIndex) {
+      const myHistoryBody = document.querySelector('#myHistoryTable tbody');
+      const lastGuessDisplay = document.getElementById('lastGuessDisplay');
+      const lastGuessResult = document.getElementById('lastGuessResult');
+      
+      if (!myHistoryBody) return;
+      
+      myHistoryBody.innerHTML = '';
+      
+      const myGuesses = guesses[myPlayerIndex] || [];
+      
+      atualizarHistorico(myGuesses, myHistoryBody);
+
+      // Atualizar último palpite
+      if (myGuesses.length > 0) {
+        const lastGuess = myGuesses[myGuesses.length - 1];
+        lastGuessDisplay.textContent = lastGuess.number;
+        lastGuessResult.textContent = `${lastGuess.hits} dígitos corretos`;
+      } else {
+        lastGuessDisplay.textContent = '-';
+        lastGuessResult.textContent = '-';
+      }
+    }
+
+    function handleGameEnd(gameState, gameStartTime, myPlayerIndex) {
+      const gameEndModal = document.getElementById('gameEndModal');
+      const winnerNameEl = document.getElementById('winnerName');
+      const gameDurationEl = document.getElementById('gameDuration');
+      const modalNewGameBtn = document.getElementById('modalNewGameBtn');
+      const modalEndSessionBtn = document.getElementById('modalEndSessionBtn');
+      
+      const startTime = new Date(gameStartTime);
+      const endTime = new Date(gameState.endTime || new Date());
+      const duration = Math.floor((endTime - startTime) / 1000);
+      
+      const minutes = Math.floor(duration / 60);
+      const seconds = duration % 60;
+      
+      const winnerIsMe = gameState.winner === myPlayerIndex;
+      const winnerName = winnerIsMe ? 'Você' : 'Oponente';
+      
+      winnerNameEl.textContent = winnerName;
+      gameDurationEl.textContent = `${minutes}m ${seconds}s`;
+      gameEndModal.style.display = 'flex';
+      
+      // Configurar botões do modal
+      modalNewGameBtn.addEventListener('click', async () => {
+        try {
+          await update(roomRef, {
+            status: 'waiting',
+            gameState: null,
+            currentTurn: null,
+            playerNumbers: null,
+            playerStatus: null
+          });
+          window.location.href = 'waiting.html';
+        } catch (error) {
+          console.error('Erro ao iniciar nova partida:', error);
+          alert('Ocorreu um erro ao iniciar nova partida: ' + error.message);
+        }
+      });
+      
+      modalEndSessionBtn.addEventListener('click', () => {
+        localStorage.removeItem('currentRoom');
+        localStorage.removeItem('gameData');
+        window.location.href = 'lobby.html';
+      });
+      
+      updateTurnStatus(false, true);
+    }
+    
+    function updatePlayersInfo(roomData, currentUserUid) {
+      const player1Name = document.getElementById('player1Name');
+      const player2Name = document.getElementById('player2Name');
+      const player1Status = document.getElementById('player1Status');
+      const player2Status = document.getElementById('player2Status');
+      const player1Card = document.getElementById('player1Card');
+      const player2Card = document.getElementById('player2Card');
+      
+      if (!player1Name || !player2Name) return;
+      
+      if (roomData.players['0'] === currentUserUid) {
+        player1Name.textContent = 'Você';
+        player2Name.textContent = 'Oponente';
+        player1Card.classList.add('active');
+      } else {
+        player1Name.textContent = 'Oponente';
+        player2Name.textContent = 'Você';
+        player2Card.classList.add('active');
+      }
+      
+      if (roomData.playerNumbers && roomData.playerNumbers['0']) {
+        player1Status.textContent = 'Número: ' + (roomData.players['0'] === currentUserUid ? roomData.playerNumbers['0'] : 'Oculto');
+        player1Status.classList.add('status-ready');
+      }
+      
+      if (roomData.playerNumbers && roomData.playerNumbers['1']) {
+        player2Status.textContent = 'Número: ' + (roomData.players['1'] === currentUserUid ? roomData.playerNumbers['1'] : 'Oculto');
+        player2Status.classList.add('status-ready');
+      }
+    }
+    
+    // Funções para administradores
+    function filtrarCandidatos(candidatos, palpites, numeroAlvo) {
+      return candidatos.filter(candidato => {
+        return palpites.every(palpite => {
+          const acertosCandidato = contarAcertos(palpite.number, candidato);
+          return acertosCandidato === palpite.hits;
+        });
+      });
+    }
+
+    function calcularSugestao(candidatos, palpites) {
+      if (candidatos.length === 0) return null;
+      
+      let melhorSugestao = null;
+      let menorMaxAcertos = Infinity;
+      
+      candidatos.forEach(candidato => {
+        let maxAcertos = 0;
+        let minAcertos = 4;
+        
+        palpites.forEach(palpite => {
+          const acertos = contarAcertos(palpite.number, candidato);
+          maxAcertos = Math.max(maxAcertos, acertos);
+          minAcertos = Math.min(minAcertos, acertos);
+        });
+        
+        if (maxAcertos < menorMaxAcertos) {
+          menorMaxAcertos = maxAcertos;
+          melhorSugestao = candidato;
+        }
+      });
+      
+      return melhorSugestao;
+    }
+
+    function atualizarInformacoesAdmin(roomData, myPlayerIndex) {
+      const adminSection = document.getElementById('adminSection');
+      const remainingCandidatesEl = document.getElementById('remainingCandidates');
+      const suggestedNumbersEl = document.getElementById('suggestedNumbers');
+      
+      if (!adminSection || !remainingCandidatesEl || !suggestedNumbersEl) return;
+      
+      // Verificar se o usuário é desenvolvedor (admin)
+      if (userType !== 'developer') {
+        adminSection.style.display = 'none';
+        return;
+      }
+      
+      adminSection.style.display = 'block';
+      
+      const gameState = roomData.gameState || {};
+      const guesses = gameState.guesses || {};
+      const myGuesses = guesses[myPlayerIndex] || [];
+      
+      const candidatos = gerarCandidatos();
+      const candidatosFiltrados = filtrarCandidatos(candidatos, myGuesses, opponentNumber);
+      
+      remainingCandidatesEl.textContent = candidatosFiltrados.length;
+      
+      const sugestao = calcularSugestao(candidatosFiltrados, myGuesses);
+      if (sugestao) {
+        suggestedNumbersEl.textContent = sugestao;
+      } else {
+        suggestedNumbersEl.textContent = 'Nenhuma sugestão disponível';
+      }
+    }
+
+    // Inicializar o jogo quando o DOM estiver carregado
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const username = localStorage.getItem('username');
+        currentRoom = localStorage.getItem('currentRoom');
+        const userUid = localStorage.getItem('userUid');
+        userType = localStorage.getItem('userType');
+        
+        if (!username || !currentRoom || !userUid) {
+          throw new Error('Dados de usuário ou sala não encontrados');
+        }
+        
+        const roomRef = ref(database, `rooms/${currentRoom}`);
+        const snapshot = await get(roomRef);
+        const roomData = snapshot.val();
+        
+        if (!roomData || roomData.status !== 'playing') {
+          throw new Error('Sala não encontrada ou não está em modo de jogo');
+        }
+        
+        const players = roomData.players || {};
+        if (!Object.values(players).includes(userUid)) {
+          throw new Error('Usuário não pertence a esta sala');
+        }
+        
+        for (const [index, id] of Object.entries(players)) {
+          if (id === userUid) {
+            myPlayerIndex = index;
+          } else {
+            opponentPlayerIndex = index;
+          }
+        }
+        
+        const playerNumbers = roomData.playerNumbers || {};
+        myNumber = playerNumbers[myPlayerIndex];
+        opponentNumber = playerNumbers[opponentPlayerIndex];
+        
+        const myNumberDisplay = document.getElementById('myNumberDisplay');
+        if (myNumberDisplay) {
+          myNumberDisplay.textContent = myNumber;
+        }
+        
+        const creatorIndex = roomData.creator === players['0'] ? '0' : '1';
+        currentPlayerTurn = roomData.currentTurn || creatorIndex;
+        
+        if (!roomData.gameState) {
+          const gameState = {
+            currentTurn: creatorIndex,
+            startTime: new Date().toISOString(),
+            guesses: {},
+            winner: null
+          };
+          
+          await update(roomRef, { 
+            gameState: gameState,
+            currentTurn: creatorIndex
+          });
+          
+          gameStartTime = gameState.startTime;
+        } else {
+          gameStartTime = roomData.gameState.startTime;
+        }
+        
+        // Configurar o formulário de palpites
+        const guessForm = document.getElementById('guessForm');
+        const guessInput = document.getElementById('guessInput');
+        
+        guessForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          
+          if (!isMyTurn || gameFinished) {
+            alert('Não é o seu turno ou o jogo já terminou.');
+            return;
+          }
+          
+          const guess = guessInput.value.trim();
+          if (!validarPalpite(guess)) {
+            alert('Por favor, insira um número válido de 4 dígitos.');
+            return;
+          }
+          
+          const hits = contarAcertos(guess, opponentNumber);
+          
+          try {
+            const snapshot = await get(roomRef);
+            const roomData = snapshot.val();
+            const gameState = roomData.gameState || {};
+            const guesses = gameState.guesses || {};
+            const myGuesses = guesses[myPlayerIndex] || {};
+            
+            const guessIndex = Object.keys(myGuesses).length;
+            const newGuess = {
+              number: guess,
+              hits: hits,
+              timestamp: new Date().toISOString()
+            };
+            
+            const updatedGuesses = {
+              ...guesses,
+              [myPlayerIndex]: {
+                ...myGuesses,
+                [guessIndex]: newGuess
+              }
+            };
+            
+            const updatedGameState = {
+              ...gameState,
+              guesses: updatedGuesses
+            };
+            
+            if (hits === 4) {
+              updatedGameState.winner = myPlayerIndex;
+              updatedGameState.endTime = new Date().toISOString();
+            }
+            
+            const nextTurn = myPlayerIndex === '0' ? '1' : '0';
+            
+            await update(roomRef, {
+              gameState: updatedGameState,
+              currentTurn: updatedGameState.winner ? currentPlayerTurn : nextTurn
+            });
+            
+            guessInput.value = '';
+          } catch (error) {
+            console.error('Erro ao enviar palpite:', error);
+            alert('Ocorreu um erro ao enviar seu palpite: ' + error.message);
+          }
+        });
+        
+        // Observar mudanças na sala
+        onValue(roomRef, (snapshot) => {
+          const updatedRoomData = snapshot.val();
+          if (!updatedRoomData) return;
+          
+          if (updatedRoomData.gameState && updatedRoomData.gameState.winner) {
+            gameFinished = true;
+            handleGameEnd(updatedRoomData.gameState, gameStartTime, myPlayerIndex);
+            return;
+          }
+          
+          currentPlayerTurn = updatedRoomData.currentTurn || creatorIndex;
+          isMyTurn = currentPlayerTurn === myPlayerIndex;
+          
+          updateTurnStatus(isMyTurn, gameFinished);
+          
+          if (updatedRoomData.gameState && updatedRoomData.gameState.guesses) {
+            updateGuessHistory(updatedRoomData.gameState.guesses, myPlayerIndex, opponentPlayerIndex);
+          }
+          
+          // Atualizar informações do administrador
+          atualizarInformacoesAdmin(updatedRoomData, myPlayerIndex);
+        });
+        
+        updatePlayersInfo(roomData, userUid);
+        isMyTurn = currentPlayerTurn === myPlayerIndex;
+        updateTurnStatus(isMyTurn, false);
+        
+        // Configurar botões de ação
+        const newGameBtn = document.getElementById('newGameBtn');
+        const endSessionBtn = document.getElementById('endSessionBtn');
+        const lobbyBtn = document.getElementById('lobbyBtn');
+        
+        newGameBtn.addEventListener('click', async () => {
+          try {
+            await update(roomRef, {
+          status: 'waiting',
+          gameState: null,
+          currentTurn: null,
+          playerNumbers: null,
+          playerStatus: null
+            });
+          window.location.href = 'waiting.html';
+          } catch (error) {
+          console.error('Erro ao iniciar nova partida:', error);
+          alert('Ocorreu um erro ao iniciar nova partida: ' + error.message);
+          }
+      });
+      
+        endSessionBtn.addEventListener('click', async () => {
+        if (gameFinished) {
+            // Limpar dados do localStorage antes do redirecionamento
+            localStorage.removeItem('currentRoom');
+            localStorage.removeItem('gameData');
+          window.location.href = 'lobby.html';
+          return;
+        }
+        
+          try {
+            const snapshot = await get(roomRef);
+          const roomData = snapshot.val();
+          const gameState = roomData.gameState || {};
+          gameState.winner = opponentPlayerIndex;
+          gameState.endTime = new Date().toISOString();
+          
+            await update(roomRef, { gameState: gameState });
+            
+            // Limpar dados do localStorage antes do redirecionamento
+            localStorage.removeItem('currentRoom');
+            localStorage.removeItem('gameData');
+            
+            // Pequeno delay para garantir que a atualização seja concluída
+            setTimeout(() => {
+          window.location.href = 'lobby.html';
+            }, 100);
+          } catch (error) {
+          console.error('Erro ao encerrar sessão:', error);
+            // Limpar dados mesmo em caso de erro
+            localStorage.removeItem('currentRoom');
+            localStorage.removeItem('gameData');
+          window.location.href = 'lobby.html';
+          }
+      });
+      
+        lobbyBtn.addEventListener('click', async () => {
+        if (confirm('Tem certeza que deseja voltar ao lobby? Se o jogo ainda estiver em andamento, o oponente será declarado vencedor.')) {
+          if (!gameFinished) {
+              try {
+                await update(roomRef, {
+              gameState: {
+                winner: opponentPlayerIndex,
+                endTime: new Date().toISOString()
+              }
+            });
+              } catch (error) {
+                console.error('Erro ao atualizar vencedor:', error);
+              }
+          }
+          window.location.href = 'lobby.html';
+        }
+      });
+        
+      } catch (error) {
+        console.error('Erro ao inicializar o jogo:', error);
+        alert('Erro ao inicializar o jogo: ' + error.message);
+      }
+    });
   </script>
-  <script src="../script.js"></script>
 </body>
 </html> 

@@ -1,4 +1,4 @@
-import { ref, set, onValue, remove, update, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { ref, set, onValue, remove, update, push, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { database } from './firebase-config.js';
 import { getCurrentUser } from './auth.js';
 
@@ -10,7 +10,7 @@ export const createRoom = async (roomId, roomData) => {
 
     // Garantir que o creator seja o uid do usuário
     const newRoom = {
-      id: roomId || Date.now().toString(),
+      id: roomId || Date.now().toString(), // Usar o ID fornecido ou gerar um novo
       name: roomData.name,
       creator: user.uid,
       players: {
@@ -39,21 +39,26 @@ export const joinRoom = async (roomId) => {
 
     const roomRef = ref(database, `rooms/${roomId}`);
     
-    // Primeiro, verificar se a sala existe e está disponível
-    const snapshot = await onValue(roomRef, (snapshot) => {
-      const room = snapshot.val();
-      if (!room) throw new Error('Sala não encontrada');
-      if (room.players['1']) throw new Error('Sala já está cheia');
-      if (room.status !== 'waiting') throw new Error('Sala não está disponível');
+    // Primeiro, obter os dados atuais da sala
+    const snapshot = await new Promise((resolve, reject) => {
+      onValue(roomRef, (snapshot) => {
+        resolve(snapshot.val());
+      }, (error) => {
+        reject(error);
+      });
     });
 
+    if (!snapshot) throw new Error('Sala não encontrada');
+    if (snapshot.players['1']) throw new Error('Sala já está cheia');
+
     console.log('Entrando na sala:', roomId);
-    await update(roomRef, {
-      players: {
-        1: user.uid // O segundo jogador
-      },
-      status: 'playing' // Atualizar status da sala
-    });
+    
+    // Atualizar apenas o segundo jogador, mantendo o primeiro
+    const updates = {};
+    updates['players/1'] = user.uid;
+    updates['status'] = 'waiting'; // Manter como waiting até que ambos os jogadores definam seus números
+
+    await update(roomRef, updates);
     console.log('Entrou na sala com sucesso');
     return true;
   } catch (error) {
@@ -95,36 +100,33 @@ export const observeAvailableRooms = (callback) => {
   return onValue(roomsRef, (snapshot) => {
     try {
       const rooms = snapshot.val() || {};
-      console.log('Dados brutos recebidos do Firebase:', rooms);
+      console.log('Todas as salas recebidas:', rooms);
       
-      // Converter o objeto de salas em array
-      const roomsArray = Object.entries(rooms).map(([id, room]) => ({
-        id,
-        ...room
-      }));
-      
-      console.log('Salas convertidas para array:', roomsArray);
-      
-      const availableRooms = roomsArray.filter(room => {
-        if (!room || !room.players) {
-          console.log('Sala inválida:', room);
-          return false;
-        }
-        
-        const players = room.players;
-        const isAvailable = Object.keys(players).length === 1 && 
-                          players['0'] && 
-                          room.status === 'waiting';
-        
-        console.log('Verificando sala:', room.name, {
-          playersCount: Object.keys(players).length,
-          hasPlayer0: !!players['0'],
-          status: room.status,
-          isAvailable
-        });
-        
-        return isAvailable;
-      });
+      const availableRooms = Object.entries(rooms)
+        .filter(([_, room]) => {
+          if (!room || !room.players) return false;
+          
+          // Verificar se a sala está disponível (não cheia e não em jogo)
+          const players = room.players;
+          const isAvailable = Object.keys(players).length === 1 && 
+                              players['0'] && 
+                              room.status === 'waiting';
+          
+          console.log('Sala disponível?', room.name, isAvailable, {
+            playersCount: Object.keys(players).length,
+            hasPlayer0: !!players['0'],
+            status: room.status
+          });
+          
+          return isAvailable;
+        })
+        .map(([id, room]) => ({ 
+          id, 
+          name: room.name,
+          creator: room.creator,
+          created: room.created,
+          status: room.status
+        }));
       
       console.log('Salas disponíveis filtradas:', availableRooms);
       callback(availableRooms);
@@ -133,4 +135,100 @@ export const observeAvailableRooms = (callback) => {
       callback([]);
     }
   });
+};
+
+// Funções para gerenciar números dos jogadores
+export const setPlayerNumber = async (roomId, playerNumber) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Usuário não autenticado');
+
+    const roomRef = ref(database, `rooms/${roomId}`);
+    
+    // Primeiro, obter os dados atuais da sala
+    const snapshot = await new Promise((resolve, reject) => {
+      onValue(roomRef, (snapshot) => {
+        resolve(snapshot.val());
+      }, (error) => {
+        reject(error);
+      });
+    });
+
+    if (!snapshot) throw new Error('Sala não encontrada');
+    
+    // Verificar se o jogador já definiu seu número
+    const playerIndex = Object.entries(snapshot.players).find(([_, uid]) => uid === user.uid)?.[0];
+    if (!playerIndex) throw new Error('Jogador não encontrado na sala');
+    
+    if (snapshot.playerNumbers?.[playerIndex]) {
+      throw new Error('Número já definido para este jogador');
+    }
+
+    // Atualizar o número do jogador
+    const updates = {};
+    updates[`playerNumbers/${playerIndex}`] = playerNumber;
+    updates[`playerStatus/${playerIndex}`] = 'ready';
+
+    await update(roomRef, updates);
+
+    // Verificar se o jogo pode começar
+    await checkGameStart(roomId);
+
+    return true;
+  } catch (error) {
+    console.error('Erro ao definir número do jogador:', error);
+    throw error;
+  }
+};
+
+export const checkGameStart = async (roomId) => {
+  try {
+    const roomRef = ref(database, `rooms/${roomId}`);
+    
+    // Obter dados atuais da sala
+    const snapshot = await get(roomRef);
+    const roomData = snapshot.val();
+
+    if (!roomData) throw new Error('Sala não encontrada');
+    
+    // Verificar se temos dois jogadores na sala
+    const playerCount = Object.keys(roomData.players || {}).length;
+    if (playerCount < 2) {
+      console.log('Aguardando o segundo jogador...');
+      return false;
+    }
+    
+    // Verificar se todos os jogadores estão prontos
+    const playerStatuses = roomData.playerStatus || {};
+    const allPlayersReady = Object.values(playerStatuses).every(status => status === 'ready');
+    
+    // Verificar se temos todos os números necessários
+    const playerNumbers = roomData.playerNumbers || {};
+    const allNumbersSet = Object.keys(roomData.players).every(index => playerNumbers[index]);
+    
+    console.log('Status do jogo:', {
+      playerCount,
+      allPlayersReady,
+      allNumbersSet,
+      playerStatuses,
+      playerNumbers
+    });
+    
+    if (allPlayersReady && allNumbersSet) {
+      console.log('Iniciando o jogo...');
+      
+      // Atualizar apenas os campos necessários, preservando a sala
+      await update(roomRef, {
+        status: 'playing',
+        gameStarted: new Date().toISOString()
+      });
+      
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Erro ao verificar início do jogo:', error);
+    throw error;
+  }
 }; 
