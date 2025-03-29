@@ -1,16 +1,44 @@
-[debug] [2025-03-29T16:35:55.050Z] ----------------------------------------------------------------------
-[debug] [2025-03-29T16:35:55.052Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\vidal\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js serve
-[debug] [2025-03-29T16:35:55.053Z] CLI Version:   14.0.0
-[debug] [2025-03-29T16:35:55.053Z] Platform:      win32
-[debug] [2025-03-29T16:35:55.053Z] Node Version:  v20.18.2
-[debug] [2025-03-29T16:35:55.053Z] Time:          Sat Mar 29 2025 13:35:55 GMT-0300 (Horário Padrão de Brasília)
-[debug] [2025-03-29T16:35:55.053Z] ----------------------------------------------------------------------
+[debug] [2025-03-29T17:07:55.122Z] ----------------------------------------------------------------------
+[debug] [2025-03-29T17:07:55.125Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\vidal\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js serve
+[debug] [2025-03-29T17:07:55.125Z] CLI Version:   14.0.0
+[debug] [2025-03-29T17:07:55.125Z] Platform:      win32
+[debug] [2025-03-29T17:07:55.125Z] Node Version:  v20.18.2
+[debug] [2025-03-29T17:07:55.125Z] Time:          Sat Mar 29 2025 14:07:55 GMT-0300 (Horário Padrão de Brasília)
+[debug] [2025-03-29T17:07:55.125Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2025-03-29T16:35:55.229Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2025-03-29T16:35:55.230Z] > authorizing via signed-in user (vidalivre9@gmail.com)
-[debug] [2025-03-29T16:35:55.230Z] [iam] checking project number-guesser-63f12 for permissions ["firebase.projects.get"]
-[debug] [2025-03-29T16:35:55.230Z] Checked if tokens are valid: true, expires at: 1743267870715
-[debug] [2025-03-29T16:35:55.231Z] Checked if tokens are valid: true, expires at: 1743267870715
-[debug] [2025-03-29T16:35:55.231Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12:testIamPermissions [none]
-[debug] [2025-03-29T16:35:55.232Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12:testIamPermissions x-goog-quota-user=projects/number-guesser-63f12
-[debug] [2025-03-29T16:35:55.232Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-03-29T17:07:55.307Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-03-29T17:07:55.307Z] > authorizing via signed-in user (vidalivre9@gmail.com)
+[debug] [2025-03-29T17:07:55.307Z] [iam] checking project number-guesser-63f12 for permissions ["firebase.projects.get"]
+[debug] [2025-03-29T17:07:55.308Z] Checked if tokens are valid: true, expires at: 1743270829551
+[debug] [2025-03-29T17:07:55.308Z] Checked if tokens are valid: true, expires at: 1743270829551
+[debug] [2025-03-29T17:07:55.309Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12:testIamPermissions [none]
+[debug] [2025-03-29T17:07:55.309Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12:testIamPermissions x-goog-quota-user=projects/number-guesser-63f12
+[debug] [2025-03-29T17:07:55.309Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-03-29T17:07:56.211Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12:testIamPermissions 200
+[debug] [2025-03-29T17:07:56.211Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-03-29T17:07:56.211Z] Checked if tokens are valid: true, expires at: 1743270829551
+[debug] [2025-03-29T17:07:56.211Z] Checked if tokens are valid: true, expires at: 1743270829551
+[debug] [2025-03-29T17:07:56.211Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12 [none]
+[debug] [2025-03-29T17:07:56.460Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12 200
+[debug] [2025-03-29T17:07:56.460Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/number-guesser-63f12 {"projectNumber":"128878198295","projectId":"number-guesser-63f12","lifecycleState":"ACTIVE","name":"number-guesser","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-03-28T13:39:33.515917Z"}
+[info] 
+[info] === Serving from 'C:\Users\vidal\OneDrive\Documentos\number_guesser'...
+[info] 
+[debug] [2025-03-29T17:07:56.462Z] Checked if tokens are valid: true, expires at: 1743270829551
+[debug] [2025-03-29T17:07:56.462Z] Checked if tokens are valid: true, expires at: 1743270829551
+[debug] [2025-03-29T17:07:56.463Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/number-guesser-63f12/sites 
+[debug] [2025-03-29T17:07:57.570Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/number-guesser-63f12/sites 200
+[debug] [2025-03-29T17:07:57.570Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/number-guesser-63f12/sites {"sites":[{"name":"projects/number-guesser-63f12/sites/number-guesser-63f12","defaultUrl":"https://number-guesser-63f12.web.app","appId":"1:128878198295:web:371fdcd4c0ef6eb5dde652","type":"DEFAULT_SITE"}]}
+[debug] [2025-03-29T17:07:57.570Z] Checked if tokens are valid: true, expires at: 1743270829551
+[debug] [2025-03-29T17:07:57.570Z] Checked if tokens are valid: true, expires at: 1743270829551
+[debug] [2025-03-29T17:07:57.570Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/number-guesser-63f12/webApps/1:128878198295:web:371fdcd4c0ef6eb5dde652/config [none]
+[debug] [2025-03-29T17:07:58.629Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/number-guesser-63f12/webApps/1:128878198295:web:371fdcd4c0ef6eb5dde652/config 200
+[debug] [2025-03-29T17:07:58.629Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/number-guesser-63f12/webApps/1:128878198295:web:371fdcd4c0ef6eb5dde652/config {"projectId":"number-guesser-63f12","appId":"1:128878198295:web:371fdcd4c0ef6eb5dde652","databaseURL":"https://number-guesser-63f12-default-rtdb.firebaseio.com","storageBucket":"number-guesser-63f12.firebasestorage.app","apiKey":"AIzaSyC-Zbpe2My_kgUYbaYMZF1AwiLNOOGoZ9s","authDomain":"number-guesser-63f12.firebaseapp.com","messagingSenderId":"128878198295"}
+[debug] [2025-03-29T17:07:58.633Z] Checked if tokens are valid: true, expires at: 1743270829551
+[debug] [2025-03-29T17:07:58.633Z] Checked if tokens are valid: true, expires at: 1743270829551
+[debug] [2025-03-29T17:07:58.633Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/number-guesser-63f12 [none]
+[debug] [2025-03-29T17:07:58.950Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/number-guesser-63f12 200
+[debug] [2025-03-29T17:07:58.950Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/number-guesser-63f12 {"projectId":"number-guesser-63f12","projectNumber":"128878198295","displayName":"number-guesser","name":"projects/number-guesser-63f12","resources":{"hostingSite":"number-guesser-63f12","realtimeDatabaseInstance":"number-guesser-63f12-default-rtdb"},"state":"ACTIVE","etag":"1_92ae17a8-97b2-4687-a871-c94511f6172b"}
+[info] +  hosting[number-guesser-63f12]: Local server: http://localhost:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://localhost:5000\u001b[22m\u001b[24m"}}
+[info] i  hosting: ::1 - - [29/Mar/2025:17:08:02 +0000] "GET /pages/game.html? HTTP/1.1" 200 - "http://localhost:5000/pages/waiting.html" "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36 Edg/134.0.0.0" {"metadata":{"emulator":{"name":"hosting"},"message":"::1 - - [29/Mar/2025:17:08:02 +0000] \"GET /pages/game.html? HTTP/1.1\" 200 - \"http://localhost:5000/pages/waiting.html\" \"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36 Edg/134.0.0.0\""}}
+[info] i  hosting: ::1 - - [29/Mar/2025:17:08:04 +0000] "GET /pages/game.html? HTTP/1.1" 200 - "http://localhost:5000/pages/waiting.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 OPR/116.0.0.0" {"metadata":{"emulator":{"name":"hosting"},"message":"::1 - - [29/Mar/2025:17:08:04 +0000] \"GET /pages/game.html? HTTP/1.1\" 200 - \"http://localhost:5000/pages/waiting.html\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 OPR/116.0.0.0\""}}

@@ -133,10 +133,39 @@
       background: var(--card-background);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow);
+    }
+
+    .last-guess-tabs {
+      display: flex;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .last-guess-tab {
+      flex: 1;
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .last-guess-tab.active {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    .last-guess-content {
+      display: none;
       text-align: center;
     }
 
-    .last-guess-section h3 {
+    .last-guess-content.active {
+      display: block;
+    }
+
+    .last-guess-content h3 {
       font-size: 1.1rem;
       margin-bottom: 0.5rem;
       color: var(--text-primary);
@@ -221,8 +250,34 @@
       margin: 1rem 0;
     }
 
+    .history-tabs {
+      display: flex;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .history-tab {
+      flex: 1;
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .history-tab.active {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+    }
+
     .history-section {
       width: 100%;
+      display: none;
+    }
+
+    .history-section.active {
+      display: block;
     }
 
     .history-section h3 {
@@ -413,40 +468,121 @@
         flex: 1;
       }
     }
+
+    /* Estilos para cores dos acertos */
+    .hits-cell {
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .hits-cell.my-hits {
+      color: var(--primary-color);
+    }
+
+    .hits-cell.opponent-hits {
+      color: var(--primary-color);
+    }
+
+    /* Cores para acertos do jogador (verde) */
+    .hits-cell.my-hits[data-hits="0"] { color: #3B82F6; } /* Azul */
+    .hits-cell.my-hits[data-hits="1"] { color: #10B981; } /* Verde claro */
+    .hits-cell.my-hits[data-hits="2"] { color: #059669; } /* Verde médio */
+    .hits-cell.my-hits[data-hits="3"] { color: #047857; } /* Verde escuro */
+    .hits-cell.my-hits[data-hits="4"] { color: #065F46; } /* Verde mais escuro */
+
+    /* Cores para acertos do oponente (vermelho) */
+    .hits-cell.opponent-hits[data-hits="0"] { color: #3B82F6; } /* Azul */
+    .hits-cell.opponent-hits[data-hits="1"] { color: #F59E0B; } /* Amarelo */
+    .hits-cell.opponent-hits[data-hits="2"] { color: #D97706; } /* Laranja */
+    .hits-cell.opponent-hits[data-hits="3"] { color: #B45309; } /* Laranja escuro */
+    .hits-cell.opponent-hits[data-hits="4"] { color: #92400E; } /* Vermelho */
+
+    /* Cores para resultados dos últimos palpites */
+    .last-guess-result.my-hits {
+      color: var(--primary-color);
+    }
+
+    .last-guess-result.opponent-hits {
+      color: var(--primary-color);
+    }
+
+    /* Cores para resultados do jogador */
+    .last-guess-result.my-hits[data-hits="0"] { color: #3B82F6; }
+    .last-guess-result.my-hits[data-hits="1"] { color: #10B981; }
+    .last-guess-result.my-hits[data-hits="2"] { color: #059669; }
+    .last-guess-result.my-hits[data-hits="3"] { color: #047857; }
+    .last-guess-result.my-hits[data-hits="4"] { color: #065F46; }
+
+    /* Cores para resultados do oponente */
+    .last-guess-result.opponent-hits[data-hits="0"] { color: #3B82F6; }
+    .last-guess-result.opponent-hits[data-hits="1"] { color: #F59E0B; }
+    .last-guess-result.opponent-hits[data-hits="2"] { color: #D97706; }
+    .last-guess-result.opponent-hits[data-hits="3"] { color: #B45309; }
+    .last-guess-result.opponent-hits[data-hits="4"] { color: #92400E; }
+
+    /* Estilos para o tooltip de notificação */
+    .notification-tooltip {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-background);
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      text-align: center;
+      min-width: 200px;
+      max-width: 90%;
+    }
+
+    .notification-tooltip.show {
+      opacity: 1;
+    }
+
+    .notification-tooltip.success {
+      border-left: 4px solid #10B981;
+    }
+
+    .notification-tooltip.warning {
+      border-left: 4px solid #F59E0B;
+    }
+
+    .notification-tooltip.error {
+      border-left: 4px solid #EF4444;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="turn-indicator" id="turnIndicator">Aguardando...</div>
 
-    <!-- <div class="players-info">
-      <div class="player-card" id="player1Card">
-        <div class="player-name" id="player1Name">Jogador 1</div>
-        <div class="player-status" id="player1Status">Aguardando número...</div>
-      </div>
-      <div class="player-card" id="player2Card">
-        <div class="player-name" id="player2Name">Jogador 2</div>
-        <div class="player-status" id="player2Status">Aguardando número...</div>
-      </div>
-    </div> -->
-
     <div class="game-status-cards">
       <div class="status-card" id="myNumberCard">
         <h3>Seu Número</h3>
         <div class="status-value" id="myNumberDisplay">????</div>
       </div>
-      <div class="status-card" id="lastGuessCard">
-        <h3>Último Palpite</h3>
-        <div class="status-value" id="lastGuessDisplay">-</div>
-        <div class="status-detail" id="lastGuessResult">-</div>
+      <div class="last-guess-section">
+        <div class="last-guess-tabs">
+          <div class="last-guess-tab active" data-tab="my">Meu Último Palpite</div>
+          <div class="last-guess-tab" data-tab="opponent">Último Palpite do Oponente</div>
+        </div>
+
+        <div class="last-guess-content active" id="myLastGuessContent">
+          <h3>Meu Último Palpite</h3>
+          <div class="last-guess-display" id="myLastGuessDisplay">-</div>
+          <div class="last-guess-result" id="myLastGuessResult">-</div>
+        </div>
+
+        <div class="last-guess-content" id="opponentLastGuessContent">
+          <h3>Último Palpite do Oponente</h3>
+          <div class="last-guess-display" id="opponentLastGuessDisplay">-</div>
+          <div class="last-guess-result" id="opponentLastGuessResult">-</div>
+        </div>
       </div>
     </div>
-
-    <!-- <div class="last-guess-section">
-      <h3>Último Palpite</h3>
-      <div class="last-guess-display" id="lastGuessDisplay">-</div>
-      <div class="last-guess-result" id="lastGuessResult">-</div>
-    </div> -->
 
     <div class="game-container">
       <!-- Seção de números sugeridos e candidatos (apenas para administradores) -->
@@ -464,10 +600,6 @@
         </div>
       </div>
 
-      <!-- <div class="my-number-display">
-        Seu número: <span id="myNumberDisplay">????</span>
-      </div> -->
-
       <form id="guessForm">
         <div class="guessInputs">
           <input type="text" id="guessInput" placeholder="Digite seu palpite (4 dígitos)" maxlength="4" required pattern="\d{4}">
@@ -476,9 +608,27 @@
       </form>
 
       <div class="game-history">
-        <div class="history-section">
+        <div class="history-tabs">
+          <div class="history-tab active" data-tab="my">Meus Palpites</div>
+          <div class="history-tab" data-tab="opponent">Palpites do Oponente</div>
+        </div>
+
+        <div class="history-section active" id="myHistorySection">
           <h3>Meus Palpites</h3>
           <table id="myHistoryTable">
+            <thead>
+              <tr>
+                <th>Palpite</th>
+                <th>Acertos</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="history-section" id="opponentHistorySection">
+          <h3>Palpites do Oponente</h3>
+          <table id="opponentHistoryTable">
             <thead>
               <tr>
                 <th>Palpite</th>
@@ -510,6 +660,8 @@
       </div>
     </div>
   </div>
+  
+  <div class="notification-tooltip" id="notificationTooltip"></div>
   
   <script type="module">
     // Importar configuração do Firebase
@@ -564,7 +716,7 @@
       return /^\d{4}$/.test(palpite);
     }
 
-    function atualizarHistorico(historico, tabela) {
+    function atualizarHistorico(historico, tabela, isOpponent = false) {
       if (!tabela) return;
       
       tabela.innerHTML = '';
@@ -572,8 +724,13 @@
         const row = document.createElement('tr');
         const palpiteCell = document.createElement('td');
         const acertosCell = document.createElement('td');
+        
         palpiteCell.textContent = item.number;
         acertosCell.textContent = item.hits;
+        acertosCell.classList.add('hits-cell');
+        acertosCell.classList.add(isOpponent ? 'opponent-hits' : 'my-hits');
+        acertosCell.setAttribute('data-hits', item.hits);
+        
         row.appendChild(palpiteCell);
         row.appendChild(acertosCell);
         tabela.appendChild(row);
@@ -595,7 +752,7 @@
       }
       
       if (isMyTurn) {
-        turnIndicator.textContent = 'Seu turno! Faça um palpite.';
+        turnIndicator.textContent = 'Sua vez! Faça um palpite.';
         turnIndicator.className = 'turn-indicator my-turn';
         guessInput.disabled = false;
         submitBtn.disabled = false;
@@ -609,25 +766,51 @@
     
     function updateGuessHistory(guesses, myPlayerIndex, opponentPlayerIndex) {
       const myHistoryBody = document.querySelector('#myHistoryTable tbody');
-      const lastGuessDisplay = document.getElementById('lastGuessDisplay');
-      const lastGuessResult = document.getElementById('lastGuessResult');
+      const opponentHistoryBody = document.querySelector('#opponentHistoryTable tbody');
+      const myLastGuessDisplay = document.getElementById('myLastGuessDisplay');
+      const myLastGuessResult = document.getElementById('myLastGuessResult');
+      const opponentLastGuessDisplay = document.getElementById('opponentLastGuessDisplay');
+      const opponentLastGuessResult = document.getElementById('opponentLastGuessResult');
       
-      if (!myHistoryBody) return;
+      if (!myHistoryBody || !opponentHistoryBody) return;
       
+      // Limpar tabelas
       myHistoryBody.innerHTML = '';
+      opponentHistoryBody.innerHTML = '';
       
       const myGuesses = guesses[myPlayerIndex] || [];
+      const opponentGuesses = guesses[opponentPlayerIndex] || [];
       
-      atualizarHistorico(myGuesses, myHistoryBody);
+      // Atualizar tabela de meus palpites
+      atualizarHistorico(myGuesses, myHistoryBody, false);
 
-      // Atualizar último palpite
+      // Atualizar tabela de palpites do oponente
+      atualizarHistorico(opponentGuesses, opponentHistoryBody, true);
+
+      // Atualizar último palpite do jogador
       if (myGuesses.length > 0) {
         const lastGuess = myGuesses[myGuesses.length - 1];
-        lastGuessDisplay.textContent = lastGuess.number;
-        lastGuessResult.textContent = `${lastGuess.hits} dígitos corretos`;
+        myLastGuessDisplay.textContent = lastGuess.number;
+        myLastGuessResult.textContent = `${lastGuess.hits} dígitos corretos`;
+        myLastGuessResult.classList.add('my-hits');
+        myLastGuessResult.setAttribute('data-hits', lastGuess.hits);
       } else {
-        lastGuessDisplay.textContent = '-';
-        lastGuessResult.textContent = '-';
+        myLastGuessDisplay.textContent = '-';
+        myLastGuessResult.textContent = '-';
+        myLastGuessResult.removeAttribute('data-hits');
+      }
+
+      // Atualizar último palpite do oponente
+      if (opponentGuesses.length > 0) {
+        const lastGuess = opponentGuesses[opponentGuesses.length - 1];
+        opponentLastGuessDisplay.textContent = lastGuess.number;
+        opponentLastGuessResult.textContent = `${lastGuess.hits} dígitos corretos`;
+        opponentLastGuessResult.classList.add('opponent-hits');
+        opponentLastGuessResult.setAttribute('data-hits', lastGuess.hits);
+      } else {
+        opponentLastGuessDisplay.textContent = '-';
+        opponentLastGuessResult.textContent = '-';
+        opponentLastGuessResult.removeAttribute('data-hits');
       }
     }
 
@@ -776,6 +959,21 @@
       }
     }
 
+    function showNotification(message, type = 'success') {
+      const tooltip = document.getElementById('notificationTooltip');
+      tooltip.className = `notification-tooltip ${type}`;
+      tooltip.textContent = message;
+      tooltip.classList.add('show');
+      
+      // Remove o tooltip após 3 segundos
+      setTimeout(() => {
+        tooltip.classList.remove('show');
+        setTimeout(() => {
+          tooltip.textContent = '';
+        }, 300);
+      }, 3000);
+    }
+
     // Inicializar o jogo quando o DOM estiver carregado
     document.addEventListener('DOMContentLoaded', async () => {
       try {
@@ -847,7 +1045,7 @@
           event.preventDefault();
           
           if (!isMyTurn || gameFinished) {
-            alert('Não é o seu turno ou o jogo já terminou.');
+            alert('Não é a sua vez ou o jogo já terminou.');
             return;
           }
           
@@ -889,6 +1087,9 @@
             if (hits === 4) {
               updatedGameState.winner = myPlayerIndex;
               updatedGameState.endTime = new Date().toISOString();
+              showNotification('Parabéns! Você venceu o jogo!', 'success');
+            } else {
+              showNotification(`Você acertou ${hits} números!`, 'success');
             }
             
             const nextTurn = myPlayerIndex === '0' ? '1' : '0';
@@ -922,6 +1123,16 @@
           updateTurnStatus(isMyTurn, gameFinished);
           
           if (updatedRoomData.gameState && updatedRoomData.gameState.guesses) {
+            const guesses = updatedRoomData.gameState.guesses;
+            const opponentGuesses = guesses[opponentPlayerIndex] || [];
+            
+            if (opponentGuesses.length > 0) {
+              const lastGuess = opponentGuesses[opponentGuesses.length - 1];
+              if (lastGuess.timestamp && new Date(lastGuess.timestamp) > new Date(Date.now() - 5000)) {
+                showNotification(`Seu oponente acertou ${lastGuess.hits} números!`, 'warning');
+              }
+            }
+            
             updateGuessHistory(updatedRoomData.gameState.guesses, myPlayerIndex, opponentPlayerIndex);
           }
           
@@ -1006,6 +1217,50 @@
           window.location.href = 'lobby.html';
         }
       });
+        
+        // Configurar tabs do histórico
+        const historyTabs = document.querySelectorAll('.history-tab');
+        const historySections = document.querySelectorAll('.history-section');
+
+        historyTabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+            
+            // Atualizar tabs ativas
+            historyTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Atualizar seções visíveis
+            historySections.forEach(section => {
+              section.classList.remove('active');
+              if (section.id === `${targetTab}HistorySection`) {
+                section.classList.add('active');
+              }
+            });
+          });
+        });
+        
+        // Configurar tabs do último palpite
+        const lastGuessTabs = document.querySelectorAll('.last-guess-tab');
+        const lastGuessContents = document.querySelectorAll('.last-guess-content');
+
+        lastGuessTabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+            
+            // Atualizar tabs ativas
+            lastGuessTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Atualizar conteúdos visíveis
+            lastGuessContents.forEach(content => {
+              content.classList.remove('active');
+              if (content.id === `${targetTab}LastGuessContent`) {
+                content.classList.add('active');
+              }
+            });
+          });
+        });
         
       } catch (error) {
         console.error('Erro ao inicializar o jogo:', error);
